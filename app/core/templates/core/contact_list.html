@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact List</title>
+</head>
+<body>
+    <h1>Contactos</h1>
+    <h2>Grupo: 
+        <form method="get" style="display:inline;">
+            <select name="group" onchange="this.form.submit()">
+                {% for group in groups %}
+                    <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>
+                        {{ group.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </h2>
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Activo</th>
+            <th>Text 1</th>
+            <th>Texto 2</th>
+            <th>Texto 3</th>
+        </tr>
+        {% for contact in contacts %}
+        <tr>
+            <td>{{ contact.name }}</td>
+            <td>{{ contact.phone }}</td>
+            <td>{{ contact.active }}</td>
+            <td>{{ contact.text_1 }}</td>
+            <td>{{ contact.text_2 }}</td>
+            <td>{{ contact.text_3 }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>Cargar contactos manualmente</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form_text.as_p }}
+        <button type="submit">Cargar texto</button>
+    </form>
+
+    <h2>Subir archivo CSV</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form_csv.as_p }}
+        <button type="submit">Cargar CSV</button>
+    </form>
+</body>
+</html>
