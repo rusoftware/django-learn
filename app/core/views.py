@@ -86,11 +86,6 @@ def instances_list(request):
             form.save()
             return redirect('instances_list')
 
-        return render(request, 'core/instances_list.html', {
-            'instances': instances,
-            'form': form
-        })
-
     return render(request, 'core/instances_list.html', {
         'instances': instances,
         'form': form
