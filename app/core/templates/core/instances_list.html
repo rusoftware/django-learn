@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instances List</title>
+</head>
+<body>
+    <h1>Instancias</h1>
+    <table border="1">
+        <tr>
+            <th>Nombre</th>
+            <th>API URL</th>
+            <th>API Key</th>
+        </tr>
+        {% for instance in instances %}
+        <tr>
+            <td>{{ instance.name }}</td>
+            <td>{{ instance.api_url }}</td>
+            <td>{{ instance.api_key }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <hr>
+    <h2>Agregar Instancia</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+    </form>
+
+    <p><a href="{% url 'contact_list' %}">Volver a contactos</a></p>
+
+</body>
+</html>
