@@ -90,3 +90,8 @@ def instances_list(request):
             'instances': instances,
             'form': form
         })
+
+    return render(request, 'core/instances_list.html', {
+        'instances': instances,
+        'form': form
+    })
