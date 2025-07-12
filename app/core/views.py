@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import Contact, ContactGroup
-from .forms import ContactBulkForm, ContactCSVForm
+from .models import Contact, ContactGroup, Instance
+from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
 import csv
 from io import TextIOWrapper
 
@@ -75,3 +75,18 @@ def contact_list(request):
         'groups': groups,
         'selected_group': selected_group,
     })
+
+def instances_list(request):
+    instances = Instance.objects.all()
+    form = InstanceForm()
+
+    if request.method == 'POST':
+        form = InstanceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('instances_list')
+
+        return render(request, 'core/instances_list.html', {
+            'instances': instances,
+            'form': form
+        })
