@@ -7,15 +7,17 @@
     <h1>Instancias</h1>
     <table border="1">
         <tr>
-            <th>Nombre</th>
+            <th>Description</th>
             <th>API URL</th>
             <th>API Key</th>
+            <th>Instance Name</th>
         </tr>
         {% for instance in instances %}
         <tr>
-            <td>{{ instance.name }}</td>
+            <td>{{ instance.description }}</td>
             <td>{{ instance.api_url }}</td>
             <td>{{ instance.api_key }}</td>
+            <td>{{ instance.instance_name }}</td>
         </tr>
         {% endfor %}
     </table>
