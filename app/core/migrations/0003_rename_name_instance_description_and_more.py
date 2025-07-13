@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='instance',
             name='instance_name',
-            field=models.CharField(default=1, max_length=100),
+            field=models.CharField(default='', max_length=100),
             preserve_default=False,
         ),
     ]
