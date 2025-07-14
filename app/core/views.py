@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .models import Contact, ContactGroup, Instance, MessageHistory
+from time import sleep
+from .models import Contact, ContactGroup, Instance, MessageHistory, MessageSend
 from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
-from .utils import send_whatsapp_message, send_whatsapp_media
+from .utils import send_whatsapp_message, send_whatsapp_media, build_message
 import csv
 from io import TextIOWrapper
 
@@ -99,7 +100,62 @@ def toggle_instance_active(request, pk):
     instance.save()
     return redirect('instances_list')
 
-def test_whatsapp_send(request):
+def send_messages_view(request):
+    group_id = request.GET.get("group")
+    if not group_id:
+        return HttpResponse("Falta el parámetro ?group=<id>")
+    
+    try:
+        group = ContactGroup.objects.get(id=group_id)
+    except ContactGroup.DoesNotExist:
+        return HttpResponse("Grupo no encontrado.")
+    
+    campaign = MessageSend.objects.last()
+    if not campaign:
+        return HttpResponse("No hay campañas (MessageSend) creadas.")
+
+    instances = list(Instance.objects.filter(active=True))
+    contacts = list(Contact.objects.filter(active=True, group=group))
+
+    if not instances:
+        return HttpResponse("No hay instancias activas disponibles.")
+    if not contacts:
+        return HttpResponse("No hay contactos activos en el grupo.")
+    
+
+    instance_index = 0
+    total = len(contacts)
+    log = []
+
+    # print("Contactos activos:", [(c.name, c.phone, c.group_id) for c in contacts])
+    # print("Instancias activas:", [(i.instance_name, i.api_url) for i in instances])
+
+    for i, contact in enumerate(contacts, start=1):
+        instance = instances[instance_index]
+        message = build_message(contact)
+        full_status = send_whatsapp_message(instance, contact, message)
+        status = 'success' if full_status.startswith('success') else 'error'
+
+        # print(f"Enviando a: {contact.name} con {instance.instance_name}")
+
+        MessageHistory.objects.create(
+            send=campaign,
+            instance=instance,
+            contact=contact,
+            message_sent=message,
+            status=status
+        )
+
+        log.append(f"{i}/{total} → {contact.name} ({contact.phone}) - {instance.instance_name} - {status} - {message}")
+        instance_index = (instance_index + 1) % len(instances)
+
+        sleep(1)
+
+    return HttpResponse("<br>".join(log))
+
+
+# Test endpoints
+def test_send_text(request):
     instance = Instance.objects.get(instance_name="WA") # Instance.objects.first()
     contact = Contact.objects.filter(active=True).first()
 
@@ -110,32 +166,6 @@ def test_whatsapp_send(request):
     status = send_whatsapp_message(instance, contact, message)
 
     return HttpResponse(f"Resultado: {status}")
-
-def send_messages_view(request):
-    instances = list(Instance.objects.all())
-    contacts = list(Contact.objects.filter(active=True))
-
-    if not instances:
-        return HttpResponse("No hay instancias disponibles.")
-
-    instance_index = 0
-
-    for i, contact in enumerate(contacts):
-        instance = instances[instance_index]
-        status = send_whatsapp_message(instance, contact, f"Hola {contact.name}")
-
-        MessageHistory.objects.create(
-            send=None,  # si querés podés asociar un MessageSend más adelante
-            instance=instance,
-            contact=contact,
-            message_sent=f"Hola {contact.name}",
-            status=status
-        )
-
-        # Alternar instancia
-        instance_index = (instance_index + 1) % len(instances)
-
-    return HttpResponse("Mensajes enviados.")
 
 def test_send_media(request):
     try:
