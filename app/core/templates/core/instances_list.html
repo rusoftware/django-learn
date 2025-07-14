@@ -11,6 +11,7 @@
             <th>API URL</th>
             <th>API Key</th>
             <th>Instance Name</th>
+            <th>Status</th>
         </tr>
         {% for instance in instances %}
         <tr>
@@ -18,6 +19,14 @@
             <td>{{ instance.api_url }}</td>
             <td>{{ instance.api_key }}</td>
             <td>{{ instance.instance_name }}</td>
+            <td>
+                <form method="post" action="{% url 'toggle_instance' instance.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">
+                        {% if instance.active %}🟢 Activa{% else %}🔴 Inactiva{% endif %}
+                    </button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </table>

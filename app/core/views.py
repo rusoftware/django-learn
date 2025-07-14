@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Contact, ContactGroup, Instance, MessageHistory
 from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
@@ -92,6 +92,12 @@ def instances_list(request):
         'instances': instances,
         'form': form
     })
+
+def toggle_instance_active(request, pk):
+    instance = get_object_or_404(Instance, pk=pk)
+    instance.active = not instance.active
+    instance.save()
+    return redirect('instances_list')
 
 def test_whatsapp_send(request):
     instance = Instance.objects.get(instance_name="WA") # Instance.objects.first()

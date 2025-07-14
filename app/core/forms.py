@@ -13,4 +13,4 @@ class ContactCSVForm(forms.Form):
 class InstanceForm(forms.ModelForm):
     class Meta:
         model = Instance
-        fields = ['description', 'api_url', 'api_key', 'instance_name']
+        fields = ['description', 'api_url', 'api_key', 'instance_name', 'active']
