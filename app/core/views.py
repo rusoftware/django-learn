@@ -132,7 +132,7 @@ def send_messages_view(request):
 
     for i, contact in enumerate(contacts, start=1):
         instance = instances[instance_index]
-        message = build_message(contact)
+        message = build_message(contact, campaign.message)
         full_status = send_whatsapp_message(instance, contact, message)
         status = 'success' if full_status.startswith('success') else 'error'
 
