@@ -20,12 +20,13 @@ class Contact(models.Model):
 
 
 class Instance(models.Model):
-    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=100)
     api_url = models.URLField()
     api_key = models.CharField(max_length=255)
+    instance_name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.name
+        return self.description
 
 
 class MessageSend(models.Model):

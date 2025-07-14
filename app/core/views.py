@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
-from .models import Contact, ContactGroup, Instance
+from django.http import HttpResponse
+from .models import Contact, ContactGroup, Instance, MessageHistory
 from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
+from .utils import send_whatsapp_message, send_whatsapp_media
 import csv
 from io import TextIOWrapper
 
@@ -90,3 +92,61 @@ def instances_list(request):
         'instances': instances,
         'form': form
     })
+
+def test_whatsapp_send(request):
+    instance = Instance.objects.get(instance_name="WA") # Instance.objects.first()
+    contact = Contact.objects.filter(active=True).first()
+
+    if not instance or not contact:
+        return HttpResponse("Faltan instancia o contacto activo.")
+
+    message = f"Test desde Django para {contact.name} /n recuerda que {contact.text_1}"
+    status = send_whatsapp_message(instance, contact, message)
+
+    return HttpResponse(f"Resultado: {status}")
+
+def send_messages_view(request):
+    instances = list(Instance.objects.all())
+    contacts = list(Contact.objects.filter(active=True))
+
+    if not instances:
+        return HttpResponse("No hay instancias disponibles.")
+
+    instance_index = 0
+
+    for i, contact in enumerate(contacts):
+        instance = instances[instance_index]
+        status = send_whatsapp_message(instance, contact, f"Hola {contact.name}")
+
+        MessageHistory.objects.create(
+            send=None,  # si querés podés asociar un MessageSend más adelante
+            instance=instance,
+            contact=contact,
+            message_sent=f"Hola {contact.name}",
+            status=status
+        )
+
+        # Alternar instancia
+        instance_index = (instance_index + 1) % len(instances)
+
+    return HttpResponse("Mensajes enviados.")
+
+def test_send_media(request):
+    try:
+        instance = Instance.objects.get(instance_name="fdt")
+        contact = Contact.objects.filter(active=True).first()
+        if not contact:
+            return HttpResponse("No hay contactos activos.")
+
+        result = send_whatsapp_media(
+            instance,
+            contact,
+            mediatype="image",
+            mimetype="image/png",
+            caption="esta es una imagen enviada con evoapi",
+            media_url="https://campograndeperu.com/wp-content/uploads/2024/03/naranja-2-compressed-1024x768.jpg",
+            filename="naranja.jpg"
+        )
+        return HttpResponse(f"Resultado: {result}")
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
