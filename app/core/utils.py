@@ -1,5 +1,8 @@
 import requests
 
+def build_message(contact, template="Hola {name}"):
+    return template.format(name=contact.name)
+
 def send_whatsapp_message(instance, contact, message_text):
     url = f"{instance.api_url.rstrip('/')}/message/sendText/{instance.instance_name}"
     payload = {
@@ -8,7 +11,7 @@ def send_whatsapp_message(instance, contact, message_text):
     }
     headers = {
         "Content-Type": "application/json",
-        "apikey": instance.api_key  # <- clave: igual que en curl
+        "apikey": instance.api_key
     }
 
     print("Sending to:", url)
