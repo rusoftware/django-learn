@@ -1,7 +1,19 @@
 import requests
+import string
 
-def build_message(contact, template="Hola {name}"):
-    return template.format(name=contact.name)
+def build_message(contact, template):
+    data = {
+        "name": contact.name or "",
+        "phone": contact.phone or "",
+        "text_1": contact.text_1 or "",
+        "text_2": contact.text_2 or "",
+        "text_3": contact.text_3 or "",
+    }
+
+    try:
+        return string.Template(template).safe_substitute(data)
+    except Exception as e:
+        return f"[ERROR en plantilla: {str(e)}]"
 
 def send_whatsapp_message(instance, contact, message_text):
     url = f"{instance.api_url.rstrip('/')}/message/sendText/{instance.instance_name}"
