@@ -12,4 +12,7 @@ urlpatterns = [
     path('test-send-media/', views.test_send_media, name='test_send_media'),
     # actions
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
