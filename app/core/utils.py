@@ -1,5 +1,11 @@
 import requests
 import string
+import mimetypes
+
+mimetypes.add_type("video/mp4", ".mp4")
+mimetypes.add_type("audio/mpeg", ".mp3")
+mimetypes.add_type("application/pdf", ".pdf")
+
 
 def build_message(contact, template):
     data = {
@@ -14,6 +20,23 @@ def build_message(contact, template):
         return string.Template(template).safe_substitute(data)
     except Exception as e:
         return f"[ERROR en plantilla: {str(e)}]"
+
+def get_mimetype_and_mediatype(filename):
+    print("Determining mimetype for:", filename)
+    mimetype, _ = mimetypes.guess_type(filename)
+    print("Mimetype found:", mimetype)
+    mimetype = mimetype or "application/octet-stream"
+    
+    if mimetype.startswith("image/"):
+        mediatype = "image"
+    elif mimetype.startswith("video/"):
+        mediatype = "video"
+    elif mimetype.startswith("audio/"):
+        mediatype = "audio"
+    else:
+        mediatype = "document"
+
+    return mimetype, mediatype
 
 def send_whatsapp_message(instance, contact, message_text):
     url = f"{instance.api_url.rstrip('/')}/message/sendText/{instance.instance_name}"
