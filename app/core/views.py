@@ -145,7 +145,7 @@ def send_messages_view(request):
                 instance=instance,
                 contact=contact,
                 mediatype="image",
-                mimetype="image/png",  # fijo
+                mimetype=mimetypes.guess_type(campaign.image_file.url)[0] or "application/octet-stream",
                 caption=message,       # usamos message como caption
                 media_url=media_url,
                 filename=campaign.filename or "imagen.png"
