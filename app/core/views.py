@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.conf import settings
 from time import sleep
 from .models import Contact, ContactGroup, Instance, MessageHistory, MessageSend
 from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
@@ -133,10 +134,26 @@ def send_messages_view(request):
     for i, contact in enumerate(contacts, start=1):
         instance = instances[instance_index]
         message = build_message(contact, campaign.message)
-        full_status = send_whatsapp_message(instance, contact, message)
-        status = 'success' if full_status.startswith('success') else 'error'
 
-        # print(f"Enviando a: {contact.name} con {instance.instance_name}")
+        if campaign.image_file:
+            media_url = request.build_absolute_uri(campaign.image_file.url)
+        else:
+            media_url = campaign.media_url
+
+        if campaign.send_type == 'image':
+            full_status = send_whatsapp_media(
+                instance=instance,
+                contact=contact,
+                mediatype="image",
+                mimetype="image/png",  # fijo
+                caption=message,       # usamos message como caption
+                media_url=media_url,
+                filename=campaign.filename or "imagen.png"
+            )
+        else:
+            full_status = send_whatsapp_message(instance, contact, message)
+        
+        status = 'success' if full_status.startswith('success') else 'error'
 
         MessageHistory.objects.create(
             send=campaign,

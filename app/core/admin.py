@@ -1,10 +1,11 @@
 from django.contrib import admin
 from .models import ContactGroup, Contact, Instance, MessageSend, MessageHistory
+from .forms import MessageSendForm
 
 admin.site.register(ContactGroup)
 # admin.site.register(Contact)
 # admin.site.register(Instance)
-admin.site.register(MessageSend)
+# admin.site.register(MessageSend)
 admin.site.register(MessageHistory)
 
 @admin.register(Contact)
@@ -16,3 +17,7 @@ class ContactAdmin(admin.ModelAdmin):
 class InstanceAdmin(admin.ModelAdmin):
     list_display = ('description', 'instance_name', 'active')
     list_filter = ('active',)
+
+@admin.register(MessageSend)
+class MessageSendAdmin(admin.ModelAdmin):
+    form = MessageSendForm

@@ -1,4 +1,6 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
@@ -10,4 +12,4 @@ urlpatterns = [
     path('test-send-media/', views.test_send_media, name='test_send_media'),
     # actions
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

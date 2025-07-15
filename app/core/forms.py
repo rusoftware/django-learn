@@ -1,5 +1,5 @@
 from django import forms
-from .models import Instance
+from .models import Instance, MessageSend
 
 class ContactBulkForm(forms.Form):
     raw_contacts = forms.CharField(
@@ -14,3 +14,15 @@ class InstanceForm(forms.ModelForm):
     class Meta:
         model = Instance
         fields = ['description', 'api_url', 'api_key', 'instance_name', 'active']
+
+class MessageSendForm(forms.ModelForm):
+    class Meta:
+        model = MessageSend
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Si ya hay una imagen, hacemos media_url solo lectura
+        if self.instance and self.instance.pk and self.instance.image_file:
+            self.fields['media_url'].disabled = True
