@@ -6,6 +6,7 @@ from .models import Contact, ContactGroup, Instance, MessageHistory, MessageSend
 from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message
 import csv
+import mimetypes
 from io import TextIOWrapper
 
 def contact_list(request):
@@ -135,9 +136,12 @@ def send_messages_view(request):
         instance = instances[instance_index]
         message = build_message(contact, campaign.message)
 
-        if campaign.image_file:
+        if campaign.image_file and campaign.image_file.name:
+            mimetype, _= mimetypes.guess_type(campaign.image_file.name)
+            mimetype = mimetype or "image/png"
             media_url = request.build_absolute_uri(campaign.image_file.url)
         else:
+            mimetype = "image/png"
             media_url = campaign.media_url
 
         if campaign.send_type == 'image':
@@ -145,7 +149,7 @@ def send_messages_view(request):
                 instance=instance,
                 contact=contact,
                 mediatype="image",
-                mimetype=mimetypes.guess_type(campaign.image_file.url)[0] or "application/octet-stream",
+                mimetype=mimetype,
                 caption=message,       # usamos message como caption
                 media_url=media_url,
                 filename=campaign.filename or "imagen.png"
