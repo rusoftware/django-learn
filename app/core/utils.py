@@ -5,7 +5,9 @@ import mimetypes
 mimetypes.add_type("video/mp4", ".mp4")
 mimetypes.add_type("audio/mpeg", ".mp3")
 mimetypes.add_type("application/pdf", ".pdf")
-
+mimetypes.add_type("image/jpeg", ".jpg")
+mimetypes.add_type("image/png", ".png")
+mimetypes.add_type("image/webp", ".webp")
 
 def build_message(contact, template):
     data = {

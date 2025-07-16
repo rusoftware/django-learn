@@ -33,7 +33,7 @@ class Instance(models.Model):
         return self.description
 
 
-class MessageSend(models.Model):
+class MessageCampaign(models.Model):
     TEXT = 'text'
     IMAGE = 'image'
     SEND_TYPE_CHOICES = [
@@ -72,7 +72,7 @@ class MessageSend(models.Model):
 
 
 class MessageHistory(models.Model):
-    send = models.ForeignKey(MessageSend, on_delete=models.CASCADE)
+    campaign = models.ForeignKey(MessageCampaign, on_delete=models.CASCADE)
     instance = models.ForeignKey(Instance, on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
     message_sent = models.TextField()

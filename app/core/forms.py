@@ -1,5 +1,5 @@
 from django import forms
-from .models import Instance, MessageSend
+from .models import Instance, MessageCampaign
 
 class ContactBulkForm(forms.Form):
     raw_contacts = forms.CharField(
@@ -17,7 +17,7 @@ class InstanceForm(forms.ModelForm):
 
 class MessageSendForm(forms.ModelForm):
     class Meta:
-        model = MessageSend
+        model = MessageCampaign
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
