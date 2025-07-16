@@ -24,5 +24,5 @@ class MessageSendForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Si ya hay una imagen, hacemos media_url solo lectura
-        if self.instance and self.instance.pk and self.instance.image_file:
-            self.fields['media_url'].disabled = True
+        # if self.instance and self.instance.pk and self.instance.image_file:
+        #     self.fields['media_url'].disabled = True

@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+from urllib.parse import urljoin
+from .utils import validate_supported_media_file
 
 class ContactGroup(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -35,19 +37,19 @@ class Instance(models.Model):
 
 class MessageCampaign(models.Model):
     TEXT = 'text'
-    IMAGE = 'image'
+    MEDIA = 'media'
     SEND_TYPE_CHOICES = [
         (TEXT, 'Text'),
-        (IMAGE, 'Image'),
+        (MEDIA, 'Media'),
     ]
 
     send_type = models.CharField(max_length=5, choices=SEND_TYPE_CHOICES, default=TEXT, help_text="Tipo de mensaje a enviar")
     message = models.TextField()
-    image_file = models.ImageField(
-        upload_to='campaign_images/',
+    media_file = models.FileField(
+        upload_to='media/',
         null=True,
         blank=True,
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])]
+        validators=[validate_supported_media_file],
     )
     media_url = models.URLField(null=True, blank=True)
     filename = models.CharField(max_length=100, null=True, blank=True)
@@ -59,17 +61,16 @@ class MessageCampaign(models.Model):
         return f"{self.send_type.upper()} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
 
     def clean(self):
-        if self.send_type == 'image' and not self.image_file and not self.media_url:
-            raise ValidationError("Debés subir una imagen o indicar una URL para el envío de tipo 'imagen'.")
+        if self.send_type == 'media' and not self.media_file and not self.media_url:
+            raise ValidationError("Debés subir un archivo o indicar una URL para el envío de tipo 'media'.")
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.send_type == 'image' and self.image_file:
-            domain = getattr(settings, 'DOMAIN', 'http://localhost:8010')  # o usar un valor real en producción
-            self.media_url = f"{domain}{settings.MEDIA_URL}{self.image_file.name}"
+        if self.send_type == 'media' and self.media_file:
+            domain = getattr(settings, 'DOMAIN', 'http://localhost:8010')
+            media_path = f"{settings.MEDIA_URL}{self.media_file.name}"
+            self.media_url = urljoin(domain, media_path)
             super().save(update_fields=["media_url"])
-
-
 
 class MessageHistory(models.Model):
     campaign = models.ForeignKey(MessageCampaign, on_delete=models.CASCADE)

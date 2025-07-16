@@ -1,14 +1,48 @@
 import requests
 import string
 import mimetypes
+from django.core.exceptions import ValidationError
 
-mimetypes.add_type("video/mp4", ".mp4")
-mimetypes.add_type("audio/mpeg", ".mp3")
-mimetypes.add_type("application/pdf", ".pdf")
+# validadores de archivos multimedia
 mimetypes.add_type("image/jpeg", ".jpg")
 mimetypes.add_type("image/png", ".png")
 mimetypes.add_type("image/webp", ".webp")
+mimetypes.add_type("video/mp4", ".mp4")
+mimetypes.add_type("audio/mpeg", ".mp3")
+mimetypes.add_type("application/pdf", ".pdf")
 
+# Función para obtener el tipo MIME y el tipo de medio
+# a partir del nombre del archivo
+def get_mimetype_and_mediatype(filename):
+    mimetype, _ = mimetypes.guess_type(filename)
+    mimetype = mimetype or "application/octet-stream"
+    
+    if mimetype.startswith("image/"):
+        mediatype = "image"
+    elif mimetype.startswith("video/"):
+        mediatype = "video"
+    elif mimetype.startswith("audio/"):
+        mediatype = "audio"
+    else:
+        mediatype = "document"
+
+    return mimetype, mediatype
+
+# Validador para archivos multimedia
+# que verifica si el tipo de medio es permitido
+# (imagen, video, audio, documento)
+def validate_supported_media_file(file):
+    mimetype, mediatype = get_mimetype_and_mediatype(file.name)
+    allowed_media_types = ["image", "video", "audio", "document"]
+    
+    if mediatype not in allowed_media_types:
+        raise ValidationError(f"Tipo de archivo no permitido: {mimetype} ({mediatype})")
+
+
+
+############################################################################
+# generador de mensajes para WhatsApp
+# basado en plantillas de texto
 def build_message(contact, template):
     data = {
         "name": contact.name or "",
@@ -23,23 +57,7 @@ def build_message(contact, template):
     except Exception as e:
         return f"[ERROR en plantilla: {str(e)}]"
 
-def get_mimetype_and_mediatype(filename):
-    print("Determining mimetype for:", filename)
-    mimetype, _ = mimetypes.guess_type(filename)
-    print("Mimetype found:", mimetype)
-    mimetype = mimetype or "application/octet-stream"
-    
-    if mimetype.startswith("image/"):
-        mediatype = "image"
-    elif mimetype.startswith("video/"):
-        mediatype = "video"
-    elif mimetype.startswith("audio/"):
-        mediatype = "audio"
-    else:
-        mediatype = "document"
-
-    return mimetype, mediatype
-
+# Función para enviar mensajes de texto a través de la API de WhatsApp
 def send_whatsapp_message(instance, contact, message_text):
     url = f"{instance.api_url.rstrip('/')}/message/sendText/{instance.instance_name}"
     payload = {
@@ -63,6 +81,7 @@ def send_whatsapp_message(instance, contact, message_text):
     except Exception as e:
         return f"error: {str(e)}"
 
+# Función para enviar archivos multimedia a través de la API de WhatsApp
 def send_whatsapp_media(instance, contact, *, mediatype, mimetype, media_url, caption, filename):
     url = f"{instance.api_url}/message/sendMedia/{instance.instance_name}"
 
