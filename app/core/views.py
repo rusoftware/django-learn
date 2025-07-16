@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.conf import settings
 from time import sleep
-from .models import Contact, ContactGroup, Instance, MessageHistory, MessageSend
+from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCampaign
 from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype
 import csv
@@ -111,9 +111,9 @@ def send_messages_view(request):
     except ContactGroup.DoesNotExist:
         return HttpResponse("Grupo no encontrado.")
     
-    campaign = MessageSend.objects.last()
+    campaign = MessageCampaign.objects.last()
     if not campaign:
-        return HttpResponse("No hay campañas (MessageSend) creadas.")
+        return HttpResponse("No hay campañas (MessageCampaign) creadas.")
 
     instances = list(Instance.objects.filter(active=True))
     contacts = list(Contact.objects.filter(active=True, group=group))
@@ -155,7 +155,7 @@ def send_messages_view(request):
         status = 'success' if full_status.startswith('success') else 'error'
 
         MessageHistory.objects.create(
-            send=campaign,
+            campaign=campaign,
             instance=instance,
             contact=contact,
             message_sent=message,

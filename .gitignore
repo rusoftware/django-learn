@@ -8,3 +8,5 @@ venv/
 env/
 mariadb_data/
 core/migrations/__pycache__/
+media/
+campaign_images/
