@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.conf import settings
 from time import sleep
 from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCampaign
-from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
+from .forms import ContactBulkForm, ContactCSVForm, InstanceForm, MessageSendForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype, get_filename_from_campaign, get_int_param
 import csv
 from io import TextIOWrapper
@@ -123,6 +123,49 @@ def toggle_instance_active(request, pk):
     instance.active = not instance.active
     instance.save()
     return redirect('instances_list')
+
+
+# ================================
+# Listado de campañas
+# ================================
+def campaign_list(request, pk=None):
+    campaigns = MessageCampaign.objects.all().order_by("-created_at")
+
+    if pk:
+        instance = get_object_or_404(MessageCampaign, pk=pk)
+        if instance.status not in ("unsent", "error"):
+            return redirect("campaign_list")
+    else:
+        instance = None
+
+    if request.method == "POST":
+        form = MessageSendForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect("campaign_list")
+    else:
+        form = MessageSendForm(instance=instance)
+
+    return render(request, "core/campaign_list.html", {
+        "campaigns": campaigns,
+        "form": form,
+        "editing": instance is not None,
+        "campaign_editing": instance,
+    })
+
+# ================================
+# Acciones de campañas
+# ================================
+@require_http_methods(["POST"])
+def campaign_delete(request, pk):
+    campaign = get_object_or_404(MessageCampaign, pk=pk)
+
+    if campaign.status not in ("unsent", "error"):
+        # Opcional: no permitir borrar campañas ya enviadas
+        return redirect("campaign_list")
+
+    campaign.delete()
+    return redirect("campaign_list")
 
 
 # ================================

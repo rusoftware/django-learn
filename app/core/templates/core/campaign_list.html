@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact List</title>
+</head>
+<body>
+  {% load custom_filters %}
+  <h2>📢 Campañas</h2>
+
+  <table border="1">
+    <tr>
+      <th>Nombre</th>
+      <th>Tipo</th>
+      <th>Estado</th>
+      <th>Creada</th>
+      <th>Acciones</th>
+    </tr>
+    {% for campaign in campaigns %}
+      {% if campaign|is_campaign_editable %}
+        <tr style="background-color: #fff;">
+      {% else %}
+        <tr style="background-color: #ebebeb;">
+      {% endif %}
+
+        <td>{{ campaign.name }}</td>
+        <td>{{ campaign.get_send_type_display }}</td>
+        <td>{{ campaign.get_status_display }}</td>
+        <td>{{ campaign.created_at|date:"Y-m-d H:i" }}</td>
+        <td>
+          {% if campaign|is_campaign_editable %}
+            <a href="{% url 'campaign_edit' campaign.pk %}">✏️ Editar</a>
+
+            <form method="post" action="{% url 'campaign_delete' campaign.pk %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" onclick="return confirm('¿Seguro que querés borrar esta campaña?')" title="Borrar">
+                🗑️
+              </button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4">No hay campañas.</td></tr>
+    {% endfor %}
+  </table>
+
+  <hr>
+
+  <h3>{% if editing %}✏️ Editando campaña: {{ campaign_editing.name }}{% else %}➕ Nueva campaña{% endif %}</h3>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% if editing %}Guardar cambios{% else %}Crear campaña{% endif %}</button>
+    {% if editing %}
+      <a href="{% url 'campaign_list' %}" style="margin-left: 1em;">❌ Cancelar</a>
+    {% endif %}
+  </form>
+</body>
+</html>

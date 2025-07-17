@@ -19,6 +19,10 @@ class MessageSendForm(forms.ModelForm):
     class Meta:
         model = MessageCampaign
         fields = '__all__'
+    
+    def clean_media_url(self):
+        data = self.cleaned_data.get("media_url")
+        return data or None 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
