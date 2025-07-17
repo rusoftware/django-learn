@@ -1,13 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 from django.conf import settings
 from time import sleep
 from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCampaign
 from .forms import ContactBulkForm, ContactCSVForm, InstanceForm
-from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype
+from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype, get_filename_from_campaign, get_int_param
 import csv
 from io import TextIOWrapper
 
+# ================================
+# Listado de contactos
+# ================================
 def contact_list(request):
     groups = ContactGroup.objects.all()
     group_id = request.GET.get('group')
@@ -80,6 +85,20 @@ def contact_list(request):
         'selected_group': selected_group,
     })
 
+# ================================
+# Acciones de contactos
+# ================================
+@require_http_methods(["POST"])
+def toggle_contact_active(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    contact.active = not contact.active
+    contact.save()
+    return redirect(request.META.get("HTTP_REFERER", reverse("contact_list")))
+
+
+# ================================
+# Listado de instancias
+# ================================
 def instances_list(request):
     instances = Instance.objects.all()
     form = InstanceForm()
@@ -95,25 +114,36 @@ def instances_list(request):
         'form': form
     })
 
+# ================================
+# Acciones de instancias
+# ================================
+@require_http_methods(["POST"])
 def toggle_instance_active(request, pk):
     instance = get_object_or_404(Instance, pk=pk)
     instance.active = not instance.active
     instance.save()
     return redirect('instances_list')
 
+
+# ================================
+# Envío de mensajes
+# ================================
 def send_messages_view(request):
-    group_id = request.GET.get("group")
-    if not group_id:
-        return HttpResponse("Falta el parámetro ?group=<id>")
+    try:
+        group_id = get_int_param(request, "group")
+        campaign_id = get_int_param(request, "campaign")
+    except ValueError as e:
+        return HttpResponse(str(e))
     
     try:
         group = ContactGroup.objects.get(id=group_id)
     except ContactGroup.DoesNotExist:
         return HttpResponse("Grupo no encontrado.")
-    
-    campaign = MessageCampaign.objects.last()
-    if not campaign:
-        return HttpResponse("No hay campañas (MessageCampaign) creadas.")
+
+    try:
+        campaign = MessageCampaign.objects.get(id=campaign_id)
+    except MessageCampaign.DoesNotExist:
+        return HttpResponse("Campaña no encontrada.")
 
     instances = list(Instance.objects.filter(active=True))
     contacts = list(Contact.objects.filter(active=True, group=group))
@@ -128,18 +158,15 @@ def send_messages_view(request):
     total = len(contacts)
     log = []
 
-    # print("Contactos activos:", [(c.name, c.phone, c.group_id) for c in contacts])
-    # print("Instancias activas:", [(i.instance_name, i.api_url) for i in instances])
-
     for i, contact in enumerate(contacts, start=1):
         instance = instances[instance_index]
         message = build_message(contact, campaign.message)
 
-        media_url = campaign.media_url
-        filename = campaign.image_file.name if campaign.image_file else media_url
-        mimetype, mediatype = get_mimetype_and_mediatype(filename)
+        if campaign.send_type == 'media':
+            media_url = campaign.media_url
+            mediafile = campaign.media_file.name if campaign.media_file else media_url
+            mimetype, mediatype = get_mimetype_and_mediatype(mediafile)
 
-        if campaign.send_type == 'image':
             full_status = send_whatsapp_media(
                 instance=instance,
                 contact=contact,
@@ -147,7 +174,7 @@ def send_messages_view(request):
                 mimetype=mimetype,
                 caption=message,       # usamos message como caption
                 media_url=media_url,
-                filename=campaign.filename or "mediafile"
+                filename=get_filename_from_campaign(campaign)
             )
         else:
             full_status = send_whatsapp_message(instance, contact, message)
@@ -170,35 +197,55 @@ def send_messages_view(request):
     return HttpResponse("<br>".join(log))
 
 
-# Test endpoints
+# ================================
+# 🔧 Test Endpoints (DEBUG)
+# ================================
+# Test endpoint for sending text messages
 def test_send_text(request):
-    instance = Instance.objects.get(instance_name="WA") # Instance.objects.first()
-    contact = Contact.objects.filter(active=True).first()
+    try:
+        instance = Instance.objects.get(instance_name="fdt") # Instance.objects.first()
+        contact = Contact.objects.filter(active=True).first()
 
-    if not instance or not contact:
-        return HttpResponse("Faltan instancia o contacto activo.")
+        if not instance or not contact:
+            return HttpResponse("Faltan instancia o contacto activo.")
 
-    message = f"Test desde Django para {contact.name} /n recuerda que {contact.text_1}"
-    status = send_whatsapp_message(instance, contact, message)
+        message = f"[TEST] Hola {contact.name}, este es un mensaje de prueba."
+        status = send_whatsapp_message(instance, contact, message)
+        
+        return JsonResponse({
+            "instance": instance.instance_name,
+            "contact": contact.phone,
+            "message": message,
+            "result": status
+        })
 
-    return HttpResponse(f"Resultado: {status}")
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
 
+# Test endpoint for sending media
 def test_send_media(request):
     try:
         instance = Instance.objects.get(instance_name="fdt")
         contact = Contact.objects.filter(active=True).first()
-        if not contact:
-            return HttpResponse("No hay contactos activos.")
+        
+        if not instance or not contact:
+            return HttpResponse("Falta instancia activa o contacto activo.")
 
         result = send_whatsapp_media(
-            instance,
-            contact,
+            instance=instance,
+            contact=contact,
             mediatype="image",
-            mimetype="image/png",
-            caption="esta es una imagen enviada con evoapi",
+            mimetype="image/jpeg",
+            caption = f"[TEST] Prueba de imagen enviada con evoapi para {contact.name}.",
             media_url="https://campograndeperu.com/wp-content/uploads/2024/03/naranja-2-compressed-1024x768.jpg",
-            filename="naranja.jpg"
+            filename="naranjas.jpg"
         )
-        return HttpResponse(f"Resultado: {result}")
+        
+        return JsonResponse({
+            "instance": instance.instance_name,
+            "contact": contact.phone,
+            "media_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/JPEG_example_flower.jpg/600px-JPEG_example_flower.jpg",
+            "result": result
+        })
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")

@@ -1,7 +1,9 @@
 import requests
 import string
 import mimetypes
+import os
 from django.core.exceptions import ValidationError
+from urllib.parse import urlparse
 
 # validadores de archivos multimedia
 mimetypes.add_type("image/jpeg", ".jpg")
@@ -13,8 +15,8 @@ mimetypes.add_type("application/pdf", ".pdf")
 
 # Función para obtener el tipo MIME y el tipo de medio
 # a partir del nombre del archivo
-def get_mimetype_and_mediatype(filename):
-    mimetype, _ = mimetypes.guess_type(filename)
+def get_mimetype_and_mediatype(mediafile):
+    mimetype, _ = mimetypes.guess_type(mediafile)
     mimetype = mimetype or "application/octet-stream"
     
     if mimetype.startswith("image/"):
@@ -38,7 +40,32 @@ def validate_supported_media_file(file):
     if mediatype not in allowed_media_types:
         raise ValidationError(f"Tipo de archivo no permitido: {mimetype} ({mediatype})")
 
+# Define el nombre del archivo a partir del que seleccione
+# el usuario o de la URL del archivo multimedia
+def get_filename_from_campaign(campaign):
+    name = (campaign.filename or "").strip()
+    if name:
+        return name
 
+    if campaign.media_url:
+        path = urlparse(campaign.media_url).path
+        name = os.path.basename(path)
+        if name:
+            return name
+
+    return "default-file.jpg"
+
+
+# Valida que el parámetro sea un integer positivo
+def get_int_param(request, name):
+    value = request.GET.get(name)
+    if value is None:
+        raise ValueError(f"Falta el parámetro ?{name}=<id>")
+    
+    try:
+        return int(value)
+    except ValueError:
+        raise ValueError(f"El parámetro ?{name} debe ser un número válido.")
 
 ############################################################################
 # generador de mensajes para WhatsApp

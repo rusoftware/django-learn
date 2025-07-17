@@ -81,15 +81,74 @@ core/migrations/__pycache__/
 ## 📍 Rutas útiles
 - `/contacts/` → gestión de contactos
 - `/instances/` → gestión de instancias
-- `/send-messages/?group=ID` → ejecución de una campaña
+- `/send-messages/?group=ID&campaign=ID` → ejecución de una campaña determinada para un grupo definido
 - `/admin/` → panel de administración
 
 ---
 
-## 📬 Envíos de prueba
-- `/test-send/` → envía un texto de prueba
-- `/test-send-media/` → envía una imagen pública de prueba
+## 📡 Integración con EvolutionAPI
 
+Este proyecto se conecta con [EvolutionAPI](https://evolutionapi.com) para enviar mensajes de WhatsApp, tanto de texto como multimedia.
+
+### ✉️ Endpoints utilizados
+
+#### 1. Enviar mensaje de texto
+
+**POST** `{api_url}/message/sendText/{instance_name}`
+
+**Headers:**
+````json
+headers = {
+  "Content-Type": "application/json",
+  "apikey": "<api_key>"
+}
+````
+
+**Body:**
+````json
+payload = {
+  "number": contact.phone,
+  "text": message_text
+}
+````
+
+#### 2. Enviar mensaje con media (imagen, video, audio, documento)
+**POST** `{api_url}/message/sendMedia/{instance_name}`
+
+**Headers:**
+````json
+headers = {
+  "Content-Type": "application/json",
+  "apikey": "<api_key>"
+}
+````
+
+**Body:**
+````json
+payload = {
+  "number": "5493412345678",
+  "mediatype": "image",           // image | video | audio | document
+  "mimetype": "image/jpeg",       // Detectado automáticamente
+  "caption": "Texto opcional (se usa el mensaje como caption)",
+  "media": "https://tuservidor.com/media/archivo.jpg",
+  "fileName": "archivo.jpg"
+}
+````
+
+### ⚙️ Detalles técnicos
+- `instance_name`: identificador configurado en EvolutionAPI por cada conexión/número.
+- `apikey`: clave privada para autenticar la petición (por instancia).
+- `media`: debe ser una URL accesible públicamente; se construye desde media_file o manualmente con media_url.
+- `fileName`: requerido para medios (se deriva automáticamente si no se define).
+- `mimetype` y `mediatype` se calculan con `mimetypes.guess_type()`.
+
+
+### 🧾 Tipos de archivo soportados
+- Texto plano
+- Imagen: image/jpeg, image/png, image/webp
+- Video: video/mp4
+- Audio: audio/mpeg
+- Documento: application/pdf, etc.
 ---
 
 ## ✅ Estado actual
