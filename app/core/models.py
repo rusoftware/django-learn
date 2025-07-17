@@ -44,6 +44,7 @@ class MessageCampaign(models.Model):
     ]
 
     send_type = models.CharField(max_length=5, choices=SEND_TYPE_CHOICES, default=TEXT, help_text="Tipo de mensaje a enviar")
+    name = models.CharField(max_length=120, null=True, blank=True)
     message = models.TextField()
     media_file = models.FileField(
         upload_to='media/',
@@ -58,7 +59,7 @@ class MessageCampaign(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.send_type.upper()} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"[{self.send_type.upper()}]: {self.name} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
 
     def clean(self):
         if self.send_type == 'media' and not self.media_file and not self.media_url:
