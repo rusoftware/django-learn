@@ -31,7 +31,14 @@
         <tr>
             <td>{{ contact.name }}</td>
             <td>{{ contact.phone }}</td>
-            <td>{{ contact.active }}</td>
+            <td>
+                <form method="post" action="{% url 'toggle_contact' contact.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">
+                        {% if contact.active %}🟢 Activo{% else %}🔴 Inactivo{% endif %}
+                    </button>
+                </form>
+            </td>
             <td>{{ contact.text_1 }}</td>
             <td>{{ contact.text_2 }}</td>
             <td>{{ contact.text_3 }}</td>
@@ -40,9 +47,33 @@
     </table>
     </div>
     <div style="display: inline-block; float: left;">
-        <a href="{% url 'test_send_text' %}">Enviar Mensaje</a>
-        <br><br><br>
-        <a href="{% url 'test_send_media' %}">Enviar Mensaje</a>
+        <button onclick="sendTest('text')">Enviar mensaje de texto</button>
+        <button onclick="sendTest('media')">Enviar mensaje con media</button>
+
+        <div id="test-result" style="margin-top: 20px; font-family: monospace;"></div>
+
+        <script>
+        function sendTest(type) {
+            const url = type === 'text' ? "{% url 'test_send_text' %}" : "{% url 'test_send_media' %}";
+            const output = document.getElementById('test-result');
+
+            output.textContent = "Enviando...";
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    output.textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(err => {
+                    output.textContent = "Error:\n" + err.message;
+                });
+        }
+        </script>
     </div>
 
     <hr style="display: block; overflow: hidden; clear: both; margin: 10px 0;">

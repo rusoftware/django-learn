@@ -12,6 +12,7 @@ urlpatterns = [
     path('test-send-media/', views.test_send_media, name='test_send_media'),
     # actions
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
+    path('contacts/<int:pk>/toggle/', views.toggle_contact_active, name='toggle_contact'),
 ]
 
 if settings.DEBUG:
