@@ -21,3 +21,7 @@ class InstanceAdmin(admin.ModelAdmin):
 @admin.register(MessageCampaign)
 class MessageSendAdmin(admin.ModelAdmin):
     form = MessageSendForm
+    list_display = ("name", "send_type", "created_at", "media_url", "filename")
+    list_filter = ("send_type", "created_at")
+    search_fields = ("name", "message", "filename")
+    ordering = ("-created_at",)
