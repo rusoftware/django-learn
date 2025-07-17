@@ -25,3 +25,4 @@ class MessageSendAdmin(admin.ModelAdmin):
     list_filter = ("send_type", "created_at")
     search_fields = ("name", "message", "filename")
     ordering = ("-created_at",)
+    readonly_fields = ("status",)

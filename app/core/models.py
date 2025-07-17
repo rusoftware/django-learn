@@ -43,8 +43,21 @@ class MessageCampaign(models.Model):
         (MEDIA, 'Media'),
     ]
 
+    STATUS_UNSENT = "unsent"
+    STATUS_SENDING = "sending"
+    STATUS_SENT = "sent"
+    STATUS_ERROR = "error"
+
+    STATUS_CHOICES = [
+        (STATUS_UNSENT, "No enviada"),
+        (STATUS_SENDING, "Enviando"),
+        (STATUS_SENT, "Enviada"),
+        (STATUS_ERROR, "Con error"),
+    ]
+
     send_type = models.CharField(max_length=5, choices=SEND_TYPE_CHOICES, default=TEXT, help_text="Tipo de mensaje a enviar")
-    name = models.CharField(max_length=120, null=True, blank=True)
+    name = models.CharField(max_length=120, unique=True)
+    
     message = models.TextField()
     media_file = models.FileField(
         upload_to='media/',
@@ -57,9 +70,11 @@ class MessageCampaign(models.Model):
     delay_min = models.PositiveIntegerField(default=1)
     delay_max = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_UNSENT)
 
     def __str__(self):
-        return f"[{self.send_type.upper()}]: {self.name} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"[{self.send_type.upper()}]: {self.name} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')} - {self.status}"
 
     def clean(self):
         if self.send_type == 'media' and not self.media_file and not self.media_url:
