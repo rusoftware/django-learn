@@ -49,10 +49,10 @@ class MessageCampaign(models.Model):
     STATUS_ERROR = "error"
 
     STATUS_CHOICES = [
-        (STATUS_UNSENT, "No enviada"),
-        (STATUS_SENDING, "Enviando"),
-        (STATUS_SENT, "Enviada"),
-        (STATUS_ERROR, "Con error"),
+        (STATUS_UNSENT, "Unsent"),
+        (STATUS_SENDING, "Sending"),
+        (STATUS_SENT, "Sent"),
+        (STATUS_ERROR, "Failed"),
     ]
 
     send_type = models.CharField(max_length=5, choices=SEND_TYPE_CHOICES, default=TEXT, help_text="Tipo de mensaje a enviar")
