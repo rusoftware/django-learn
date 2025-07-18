@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Instances List</title>
-</head>
-<body>
-    <h1>Instancias</h1>
+{% extends "core/_base.html" %}
+
+{% block meta_title %}📡 Instancias{% endblock %}
+{% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
+
+{% block content %}
+  <h1>📡 Instancias</h1>
     <table border="1">
         <tr>
             <th>Description</th>
@@ -38,8 +38,4 @@
         {{ form.as_p }}
         <button type="submit">Guardar</button>
     </form>
-
-    <p><a href="{% url 'contact_list' %}">Volver a contactos</a></p>
-
-</body>
-</html>
+{% endblock %}

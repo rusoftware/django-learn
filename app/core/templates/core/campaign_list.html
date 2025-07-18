@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Contact List</title>
-</head>
-<body>
+{% extends "core/_base.html" %}
+
+{% block meta_title %}🧪 Herramientas de prueba{% endblock %}
+{% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
+
+{% block content %}
   {% load custom_filters %}
   <h2>📢 Campañas</h2>
 
@@ -16,9 +16,7 @@
       <th>Acciones</th>
     </tr>
     {% for campaign in campaigns %}
-      {% if campaign|is_campaign_editable %}
-        <tr style="background-color: #fff;">
-      {% else %}
+      {% if not campaign|is_campaign_editable %}
         <tr style="background-color: #ebebeb;">
       {% endif %}
 
@@ -55,5 +53,4 @@
       <a href="{% url 'campaign_list' %}" style="margin-left: 1em;">❌ Cancelar</a>
     {% endif %}
   </form>
-</body>
-</html>
+{% endblock %}

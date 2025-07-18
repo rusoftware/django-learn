@@ -78,6 +78,7 @@ def contact_list(request):
 
     contacts = Contact.objects.filter(group=selected_group)
     return render(request, 'core/contact_list.html', {
+        'current_page': 'contact_list',
         'contacts': contacts,
         'form_text': form_text,
         'form_csv': form_csv,
@@ -110,6 +111,7 @@ def instances_list(request):
             return redirect('instances_list')
 
     return render(request, 'core/instances_list.html', {
+        'current_page': 'instances_list',
         'instances': instances,
         'form': form
     })
@@ -147,6 +149,7 @@ def campaign_list(request, pk=None):
         form = MessageSendForm(instance=instance)
 
     return render(request, "core/campaign_list.html", {
+        "current_page": "campaign_list",
         "campaigns": campaigns,
         "form": form,
         "editing": instance is not None,
@@ -244,6 +247,11 @@ def send_messages_view(request):
 # 🔧 Test Endpoints (DEBUG)
 # ================================
 # Test endpoint for sending text messages
+def test_tools_view(request):
+    return render(request, "core/test_tools.html", {
+        "current_page": "test_tools"
+    })
+
 def test_send_text(request):
     try:
         instance = Instance.objects.get(instance_name="fdt") # Instance.objects.first()

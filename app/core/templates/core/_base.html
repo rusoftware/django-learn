@@ -1,0 +1,16 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{% block meta_title %}Mi Sitio{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Herramientas administrativas internas.{% endblock %}" />
+</head>
+<body>
+    {% include "core/_navbar.html" with current_page=current_page|default:'home' %}
+    {% block content %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

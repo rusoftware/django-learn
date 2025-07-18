@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Contact List</title>
-</head>
-<body>
+{% extends "core/_base.html" %}
+
+{% block meta_title %}🧪 Herramientas de prueba{% endblock %}
+{% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
+
+{% block content %}
     <h1>Contactos</h1>
     <h2>Grupo: 
         <form method="get" style="display:inline;">
@@ -17,7 +17,6 @@
         </form>
     </h2>
 
-    <div style="display: inline-block; float: left; width: 750px;">
     <table border="1">
         <tr>
             <th>Nombre</th>
@@ -45,37 +44,6 @@
         </tr>
         {% endfor %}
     </table>
-    </div>
-    <div style="display: inline-block; float: left;">
-        <button onclick="sendTest('text')">Enviar mensaje de texto</button>
-        <button onclick="sendTest('media')">Enviar mensaje con media</button>
-
-        <div id="test-result" style="margin-top: 20px; font-family: monospace;"></div>
-
-        <script>
-        function sendTest(type) {
-            const url = type === 'text' ? "{% url 'test_send_text' %}" : "{% url 'test_send_media' %}";
-            const output = document.getElementById('test-result');
-
-            output.textContent = "Enviando...";
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text); });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    output.textContent = JSON.stringify(data, null, 2);
-                })
-                .catch(err => {
-                    output.textContent = "Error:\n" + err.message;
-                });
-        }
-        </script>
-    </div>
-
     <hr style="display: block; overflow: hidden; clear: both; margin: 10px 0;">
     <h2>Cargar contactos manualmente</h2>
     <form method="post">
@@ -90,7 +58,4 @@
         {{ form_csv.as_p }}
         <button type="submit">Cargar CSV</button>
     </form>
-
-    <p><a href="{% url 'instances_list' %}">Volver a instancias</a></p>
-</body>
-</html>
+{% endblock %}

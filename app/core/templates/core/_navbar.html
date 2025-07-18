@@ -1,0 +1,20 @@
+<nav style="margin-bottom: 2em;">
+  <ul>
+    <li class="{% if current_page == 'contact_list' %}active{% endif %}">
+      <a href="{% url 'contact_list' %}" style="margin-right: 1em;">👥 Contactos</a>
+    </li>
+    <li class="{% if current_page == 'instances_list' %}active{% endif %}">
+      <a href="{% url 'instances_list' %}" style="margin-right: 1em;">📡 Instancias</a>
+    </li>
+    <li class="{% if current_page == 'campaign_list' %}active{% endif %}">
+      <a href="{% url 'campaign_list' %}" style="margin-right: 1em;">📢 Campañas</a>
+    </li>
+    <li class="{% if current_page == 'test_tools' %}active{% endif %}">
+      <a href="{% url 'test_tools' %}" style="margin-right: 1em;">🧪 Tests</a>
+    </li>
+    <li class="{% if current_page == 'admin' %}active{% endif %}">
+      <a href="/admin/" style="margin-right: 1em;">⚙️ Admin</a>
+    </li>
+  </ul>
+</nav>
+<hr>
