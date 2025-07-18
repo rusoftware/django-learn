@@ -1,20 +1,21 @@
-<nav style="margin-bottom: 2em;">
-  <ul>
-    <li class="{% if current_page == 'contact_list' %}active{% endif %}">
-      <a href="{% url 'contact_list' %}" style="margin-right: 1em;">👥 Contactos</a>
-    </li>
-    <li class="{% if current_page == 'instances_list' %}active{% endif %}">
-      <a href="{% url 'instances_list' %}" style="margin-right: 1em;">📡 Instancias</a>
-    </li>
-    <li class="{% if current_page == 'campaign_list' %}active{% endif %}">
-      <a href="{% url 'campaign_list' %}" style="margin-right: 1em;">📢 Campañas</a>
-    </li>
-    <li class="{% if current_page == 'test_tools' %}active{% endif %}">
-      <a href="{% url 'test_tools' %}" style="margin-right: 1em;">🧪 Tests</a>
-    </li>
-    <li class="{% if current_page == 'admin' %}active{% endif %}">
-      <a href="/admin/" style="margin-right: 1em;">⚙️ Admin</a>
-    </li>
-  </ul>
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="navbar-menu is-active">
+    <div class="navbar-start">
+      <a href="{% url 'contact_list' %}" class="navbar-item {% if current_page == 'contact_list' %}is-active{% endif %}">
+        👥 Contactos
+      </a>
+      <a href="{% url 'instances_list' %}" class="navbar-item {% if current_page == 'instances_list' %}is-active{% endif %}">
+        📡 Instancias
+      </a>
+      <a href="{% url 'campaign_list' %}" class="navbar-item {% if current_page == 'campaign_list' %}is-active{% endif %}">
+        📢 Campañas
+      </a>
+      <a href="{% url 'test_tools' %}" class="navbar-item {% if current_page == 'test_tools' %}is-active{% endif %}">
+        🧪 Tests
+      </a>
+      <a href="/admin/" class="navbar-item {% if current_page == 'admin' %}is-active{% endif %}">
+        ⚙️ Admin
+      </a>
+    </div>
+  </div>
 </nav>
-<hr>

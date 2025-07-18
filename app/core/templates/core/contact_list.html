@@ -1,23 +1,23 @@
-{% extends "core/_base.html" %}
+{% extends "core/base.html" %}
 
 {% block meta_title %}🧪 Herramientas de prueba{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
 
 {% block content %}
     <h1>Contactos</h1>
-    <h2>Grupo: 
-        <form method="get" style="display:inline;">
-            <select name="group" onchange="this.form.submit()">
-                {% for group in groups %}
-                    <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>
-                        {{ group.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </form>
-    </h2>
+    <h2>Grupo: </h2>
+    <form method="get" style="display:inline;">
+        <select name="group" onchange="this.form.submit()">
+            {% for group in groups %}
+                <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>
+                    {{ group.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+    
 
-    <table border="1">
+    <table class="table is-striped is-hoverable is-fullwidth">
         <tr>
             <th>Nombre</th>
             <th>Teléfono</th>
@@ -44,18 +44,18 @@
         </tr>
         {% endfor %}
     </table>
-    <hr style="display: block; overflow: hidden; clear: both; margin: 10px 0;">
+    <hr>
     <h2>Cargar contactos manualmente</h2>
     <form method="post">
         {% csrf_token %}
         {{ form_text.as_p }}
-        <button type="submit">Cargar texto</button>
+        <button type="submit" class="button is-primary">Cargar texto</button>
     </form>
 
     <h2>Subir archivo CSV</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form_csv.as_p }}
-        <button type="submit">Cargar CSV</button>
+        <button type="submit" class="button is-primary">Cargar CSV</button>
     </form>
 {% endblock %}

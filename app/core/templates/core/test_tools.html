@@ -1,4 +1,4 @@
-{% extends "core/_base.html" %}
+{% extends "core/base.html" %}
 
 {% block meta_title %}🧪 Herramientas de prueba{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
@@ -6,8 +6,8 @@
 {% block content %}
 <h1>🧪 Herramientas de prueba de envío</h1>
 
-<button onclick="sendTest('text')">Enviar mensaje de texto</button>
-<button onclick="sendTest('media')">Enviar mensaje con media</button>
+<button class="button is-primary" onclick="sendTest('text')">Enviar mensaje de texto</button>
+<button class="button is-primary" onclick="sendTest('media')">Enviar mensaje con media</button>
 
 <div id="test-result" style="margin-top: 20px; font-family: monospace;"></div>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends "core/_base.html" %}
+{% extends "core/base.html" %}
 
 {% block meta_title %}🧪 Herramientas de prueba{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
@@ -7,7 +7,7 @@
   {% load custom_filters %}
   <h2>📢 Campañas</h2>
 
-  <table border="1">
+  <table class="table is-striped is-hoverable is-fullwidth">
     <tr>
       <th>Nombre</th>
       <th>Tipo</th>
@@ -30,7 +30,7 @@
 
             <form method="post" action="{% url 'campaign_delete' campaign.pk %}" style="display: inline;">
               {% csrf_token %}
-              <button type="submit" onclick="return confirm('¿Seguro que querés borrar esta campaña?')" title="Borrar">
+              <button type="submit" onclick="return confirm('¿Seguro que querés borrar esta campaña?')" title="Borrar" class="button is-primary">
                 🗑️
               </button>
             </form>

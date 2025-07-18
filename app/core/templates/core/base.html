@@ -5,12 +5,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>{% block meta_title %}Mi Sitio{% endblock %}</title>
+    <title>Pingalo · {% block meta_title %}Domina tus campañas de WhatsApp{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Herramientas administrativas internas.{% endblock %}" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 </head>
 <body>
+    {% include "core/_header.html" %}
     {% include "core/_navbar.html" with current_page=current_page|default:'home' %}
-    {% block content %}{% endblock %}
+    <section class="section">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </section>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -1,11 +1,11 @@
-{% extends "core/_base.html" %}
+{% extends "core/base.html" %}
 
 {% block meta_title %}📡 Instancias{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
 
 {% block content %}
   <h1>📡 Instancias</h1>
-    <table border="1">
+    <table class="table is-striped is-hoverable is-fullwidth">
         <tr>
             <th>Description</th>
             <th>API URL</th>
@@ -22,7 +22,7 @@
             <td>
                 <form method="post" action="{% url 'toggle_instance' instance.pk %}">
                     {% csrf_token %}
-                    <button type="submit">
+                    <button type="submit" class="button is-primary">
                         {% if instance.active %}🟢 Activa{% else %}🔴 Inactiva{% endif %}
                     </button>
                 </form>
@@ -36,6 +36,6 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Guardar</button>
+        <button type="submit" class="button is-primary">Guardar</button>
     </form>
 {% endblock %}
