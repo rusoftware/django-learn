@@ -15,6 +15,17 @@
             {% endfor %}
         </select>
     </form>
+
+    {% if errors %}
+    <div class="notification is-danger">
+        <button class="delete" onclick="this.parentElement.style.display='none';"></button>
+        <ul>
+        {% for error in errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
     
 
     <table class="table is-striped is-hoverable is-fullwidth">

@@ -1,5 +1,16 @@
 from django import forms
-from .models import Instance, MessageCampaign
+from django.core.validators import RegexValidator
+from .models import Contact, Instance, MessageCampaign
+
+class ContactForm(forms.ModelForm):
+    phone = forms.CharField(
+        validators=[RegexValidator(r'^\+?\d{7,15}$', message="Formato inválido, por favor use un número válido.")],
+        max_length=20
+    )
+
+    class Meta:
+        model = Contact
+        fields = '__all__'
 
 class ContactBulkForm(forms.Form):
     raw_contacts = forms.CharField(
