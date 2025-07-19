@@ -9,6 +9,7 @@ Incluye:
 - Creación de campañas (`MessageCampaign`)
 - Envío masivo con rotación de instancias activas
 - Registro de historial (`MessageHistory`)
+- Interfaz UI basada en Django templates con Bulma
 
 ---
 
@@ -64,15 +65,12 @@ core/migrations/__pycache__/
 ---
 
 ## 📁 Carpeta de archivos multimedia
-- Imágenes subidas se guardan en: media/campaign_images/
-- media_url se genera automáticamente si se sube un archivo
-- Asegurate de servir /media/ si desplegás en producción
+- Imágenes subidas se guardan en: `media/campaign_images/`
+- `media_url` se genera automáticamente si se sube un archivo
+- Asegurate de servir `/media/` si desplegás en producción
 ---
 
 ## 🧠 Consideraciones importantes
-- El modelo MessageCampaign reemplaza a MessageSend
-- El campo send fue renombrado a campaign en MessageHistory
-- Las migraciones correspondientes están versionadas
 - Se usa mimetypes para detección de tipo de archivo
 - Compatible con EvolutionAPI para envíos de texto y media
 
@@ -81,14 +79,16 @@ core/migrations/__pycache__/
 ## 📍 Rutas útiles
 - `/contacts/` → gestión de contactos
 - `/instances/` → gestión de instancias
+- `/campaigns/` → creación y edición de campañas
 - `/send-messages/?group=ID&campaign=ID` → ejecución de una campaña determinada para un grupo definido
+- `/test-tools/` → vista de pruebas con envío de mensajes reales
 - `/admin/` → panel de administración
 
 ---
 
 ## 📡 Integración con EvolutionAPI
 
-Este proyecto se conecta con [EvolutionAPI](https://evolutionapi.com) para enviar mensajes de WhatsApp, tanto de texto como multimedia.
+Este proyecto se conecta con [EvolutionAPI](https://evolutionapi.com) para enviar mensajes de WhatsApp (texto y multimedia).
 
 ### ✉️ Endpoints utilizados
 
@@ -152,5 +152,7 @@ payload = {
 ---
 
 ## ✅ Estado actual
-- Proyecto funcional con campañas dinámicas, historial de mensajes y soporte para envíos multimedia.
-- Listo para extender con reporting, programación de campañas o autenticación.
+- Proyecto funcional con campañas editables, historial, vista de pruebas y soporte completo para media
+- Dockerizado con Django + MariaDB
+- UI con Bulma y estructura de templates clara
+- Listo para extender con features como reporting, agendamiento o roles de usuario
