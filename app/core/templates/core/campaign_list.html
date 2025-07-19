@@ -1,6 +1,6 @@
 {% extends "core/base.html" %}
 
-{% block meta_title %}🧪 Herramientas de prueba{% endblock %}
+{% block meta_title %}{{ APP_NAME }} · 📢 Campañas{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
 
 {% block content %}
@@ -34,6 +34,7 @@
                 🗑️
               </button>
             </form>
+            <a href="{% url 'campaign_send' %}?campaign={{ campaign.pk }}">Enviar</a>
           {% endif %}
         </td>
       </tr>

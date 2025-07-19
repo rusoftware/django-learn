@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
 from django.conf import settings
@@ -8,6 +8,7 @@ from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCamp
 from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageSendForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype, get_filename_from_campaign, get_int_param
 import csv
+import json
 from io import TextIOWrapper
 
 # ================================
@@ -194,86 +195,138 @@ def campaign_delete(request, pk):
     campaign.delete()
     return redirect("campaign_list")
 
+# ================================
+# Enviar campaña
+# ================================
+def campaign_send(request):
+    # Obtener campaña de query param
+    try:
+        campaign_id = get_int_param(request, "campaign")
+        campaign = get_object_or_404(MessageCampaign, pk=campaign_id)
+    except Exception:
+        return HttpResponse("Campaña no válida o no encontrada.")
+
+    groups = ContactGroup.objects.all()
+    selected_group_id = request.GET.get('group')
+    if selected_group_id:
+        try:
+            selected_group = ContactGroup.objects.get(id=selected_group_id)
+        except ContactGroup.DoesNotExist:
+            selected_group = groups.first()
+    else:
+        selected_group = groups.first()
+
+    contacts = Contact.objects.filter(active=True, group=selected_group)
+    instances = Instance.objects.filter(active=True)
+    mimetype, mediatype = None, None
+
+    if(campaign.send_type == 'media'):
+        mediafile = campaign.media_file.name if campaign.media_file else campaign.media_url
+        mimetype, mediatype = get_mimetype_and_mediatype(mediafile)
+
+    if request.method == "POST":
+        # Aquí podría llamarse a la función de envío (o redirigir a send_messages)
+        return redirect(reverse("send_messages") + f"?group={selected_group.id}&campaign={campaign.id}")
+
+    return render(request, "core/campaign_send.html", {
+        "campaign": campaign,
+        "groups": groups,
+        "selected_group": selected_group,
+        "contacts": contacts,
+        "instances": instances,
+        "mimetype": mimetype,
+        "mediatype": mediatype,
+    })
 
 # ================================
-# Envío de mensajes
+# Envío de campaña (accion de enviar)
 # ================================
 def send_messages_view(request):
     try:
         group_id = get_int_param(request, "group")
         campaign_id = get_int_param(request, "campaign")
     except ValueError as e:
-        return HttpResponse(str(e))
+        return JsonResponse({"error": str(e)}, status=400)
     
     try:
         group = ContactGroup.objects.get(id=group_id)
     except ContactGroup.DoesNotExist:
-        return HttpResponse("Grupo no encontrado.")
+        return JsonResponse({"error": "Grupo no encontrado."}, status=404)
 
     try:
         campaign = MessageCampaign.objects.get(id=campaign_id)
     except MessageCampaign.DoesNotExist:
-        return HttpResponse("Campaña no encontrada.")
+        return JsonResponse({"error": "Campaña no encontrada."}, status=404)
 
     instances = list(Instance.objects.filter(active=True))
     contacts = list(Contact.objects.filter(active=True, group=group))
 
     if not instances:
-        return HttpResponse("No hay instancias activas disponibles.")
+        return JsonResponse({"error": "No hay instancias activas disponibles."}, status=400)
     if not contacts:
-        return HttpResponse("No hay contactos activos en el grupo.")
+        return JsonResponse({"error": "No hay contactos activos en el grupo."}, status=400)
     
-    instance_index = 0
-    total = len(contacts)
-    log = []
+    def event_stream():
+        instance_index = 0
+        total = len(contacts)
 
-    for i, contact in enumerate(contacts, start=1):
-        instance = instances[instance_index]
-        message = build_message(contact, campaign.message)
-        error_message = ""
+        for i, contact in enumerate(contacts, start=1):
+            instance = instances[instance_index]
+            message = build_message(contact, campaign.message)
+            error_message = ""
 
-        try:
-            if campaign.send_type == 'media':
-                media_url = campaign.media_url
-                mediafile = campaign.media_file.name if campaign.media_file else media_url
-                mimetype, mediatype = get_mimetype_and_mediatype(mediafile)
+            try:
+                if campaign.send_type == 'media':
+                    media_url = campaign.media_url
+                    mediafile = campaign.media_file.name if campaign.media_file else media_url
+                    mimetype, mediatype = get_mimetype_and_mediatype(mediafile)
 
-                full_status = send_whatsapp_media(
-                    instance=instance,
-                    contact=contact,
-                    mediatype=mediatype,
-                    mimetype=mimetype,
-                    caption=message,       # usamos message como caption
-                    media_url=media_url,
-                    filename=get_filename_from_campaign(campaign)
-                )
-            else:
-                full_status = send_whatsapp_message(instance, contact, message)
-            
-            status = 'success' if full_status.startswith('success') else 'error'
-            if status == 'error':
-                error_message = full_status
+                    full_status = send_whatsapp_media(
+                        instance=instance,
+                        contact=contact,
+                        mediatype=mediatype,
+                        mimetype=mimetype,
+                        caption=message,       # usamos message como caption
+                        media_url=media_url,
+                        filename=get_filename_from_campaign(campaign)
+                    )
+                else:
+                    full_status = send_whatsapp_message(instance, contact, message)
+                
+                status = 'success' if full_status.startswith('success') else 'error'
+                if status == 'error':
+                    error_message = full_status
 
-        except Exception as e:
-            status = 'error'
-            error_message = str(e)
+            except Exception as e:
+                status = 'error'
+                error_message = str(e)
 
-        MessageHistory.objects.create(
-            campaign=campaign,
-            instance=instance,
-            contact=contact,
-            message_sent=message,
-            status=status,
-            error_message=error_message
-        )
+            MessageHistory.objects.create(
+                campaign=campaign,
+                instance=instance,
+                contact=contact,
+                message_sent=message,
+                status=status,
+                error_message=error_message
+            )
 
-        log.append(f"{i}/{total} → {contact.name} ({contact.phone}) - {instance.instance_name} - {status} - {message}")
-        instance_index = (instance_index + 1) % len(instances)
+            data = {
+                "current": i,
+                "total": total,
+                "contact_name": contact.name,
+                "contact_phone": contact.phone,
+                "instance_name": instance.instance_name,
+                "status": status,
+                "message": message,
+                "error_message": error_message,
+            }
+            yield f"data: {json.dumps(data)}\n\n"
 
-        sleep(1)
+            instance_index = (instance_index + 1) % len(instances)
+            sleep(1)
 
-    campaign.update_status_from_history()
-    return HttpResponse("<br>".join(log))
+        campaign.update_status_from_history()
+    return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
 
 
 # ================================

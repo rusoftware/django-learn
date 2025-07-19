@@ -11,6 +11,7 @@ urlpatterns = [
     # actions
     path("campaigns/<int:pk>/", views.campaign_list, name="campaign_edit"),
     path("campaigns/<int:pk>/delete/", views.campaign_delete, name="campaign_delete"),
+    path('campaigns/send/', views.campaign_send, name='campaign_send'),
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
     path('contacts/<int:pk>/toggle/', views.toggle_contact_active, name='toggle_contact'),
     # test endpoints and view
