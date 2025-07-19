@@ -1,0 +1,21 @@
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="navbar-menu is-active">
+    <div class="navbar-start">
+      <a href="{% url 'contact_list' %}" class="navbar-item {% if current_page == 'contact_list' %}is-active{% endif %}">
+        👥 Contactos
+      </a>
+      <a href="{% url 'instances_list' %}" class="navbar-item {% if current_page == 'instances_list' %}is-active{% endif %}">
+        📡 Instancias
+      </a>
+      <a href="{% url 'campaign_list' %}" class="navbar-item {% if current_page == 'campaign_list' %}is-active{% endif %}">
+        📢 Campañas
+      </a>
+      <a href="{% url 'test_tools' %}" class="navbar-item {% if current_page == 'test_tools' %}is-active{% endif %}">
+        🧪 Tests
+      </a>
+      <a href="/admin/" class="navbar-item {% if current_page == 'admin' %}is-active{% endif %}">
+        ⚙️ Admin
+      </a>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+
+{% block meta_title %}🧪 Herramientas de prueba{% endblock %}
+{% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
+
+{% block content %}
+<h1>🧪 Herramientas de prueba de envío</h1>
+
+<button class="button is-primary" onclick="sendTest('text')">Enviar mensaje de texto</button>
+<button class="button is-primary" onclick="sendTest('media')">Enviar mensaje con media</button>
+
+<div id="test-result" style="margin-top: 20px; font-family: monospace;"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function sendTest(type) {
+    const url = type === 'text' ? "{% url 'test_send_text' %}" : "{% url 'test_send_media' %}";
+    const output = document.getElementById('test-result');
+
+    output.textContent = "Enviando...";
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            output.textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(err => {
+            output.textContent = "Error:\n" + err.message;
+        });
+}
+</script>
+{% endblock %}

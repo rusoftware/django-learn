@@ -1,0 +1,27 @@
+<header class="has-background-light py-4 mb-2">
+  <div class="container">
+    <div class="columns is-vcentered is-mobile is-multiline">
+      
+      <!-- Logo y título -->
+      <div class="column is-narrow">
+        <span style="font-size: 2.5rem;">📣</span>
+      </div>
+      <div class="column is-two-thirds">
+        <h1 class="title is-3 has-text-primary mb-1">Kavira</h1>
+        <p class="subtitle is-6 has-text-grey">Domina tus campañas de WhatsApp</p>
+      </div>
+
+      <!-- Estado del sistema o usuario -->
+      <div class="column has-text-right">
+        {% if request.user.is_authenticated %}
+          <p class="is-size-7 has-text-grey-dark">
+            👤 {{ request.user.username }}
+          </p>
+        {% else %}
+          <p class="is-size-7 has-text-grey-light">No autenticado</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</header>
