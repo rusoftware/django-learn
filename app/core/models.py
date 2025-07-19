@@ -61,7 +61,7 @@ class MessageCampaign(models.Model):
     send_type = models.CharField(max_length=5, choices=SEND_TYPE_CHOICES, default=TEXT, help_text="Tipo de mensaje a enviar")
     name = models.CharField(max_length=120, unique=True)
     
-    message = models.TextField()
+    message = models.TextField(null=True, blank=True)
     media_file = models.FileField(
         upload_to='media/',
         null=True,
