@@ -1,10 +1,10 @@
 {% extends "core/base.html" %}
 
-{% block meta_title %}🧪 Herramientas de prueba{% endblock %}
+{% block meta_title %}{{ APP_NAME }} · 👥 Contactos{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
 
 {% block content %}
-    <h1>Contactos</h1>
+    <h1>👥 Contactos</h1>
     <h2>Grupo: </h2>
     <form method="get" style="display:inline;">
         <select name="group" onchange="this.form.submit()">

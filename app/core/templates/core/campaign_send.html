@@ -1,0 +1,128 @@
+{% extends "core/base.html" %}
+
+{% block meta_title %}{{ APP_NAME }} · 🚀 Enviar campaña {{ campaign.name }}{% endblock %}
+{% block meta_description %}Seleccioná grupo e instancias para enviar la campaña {{ campaign.name }}.{% endblock %}
+
+{% block content %}
+  <h2>Enviar campaña: {{ campaign.name }}</h2>
+<div class="box">
+    <h2 class="title is-5">Paso 1: Seleccioná un grupo de contactos</h2>
+    <form method="get">
+      <div class="field">
+        <label class="label" for="group">Grupo</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select name="group" id="group" onchange="this.form.submit()">
+              {% for group in groups %}
+                <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>{{ group.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="box">
+    <h2 class="title is-5">Paso 2: Verificá los contactos del grupo</h2>
+    {% if contacts %}
+      <ul>
+        {% for contact in contacts %}
+          <li>{{ contact.name }} - {{ contact.phone }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No hay contactos en este grupo.</p>
+    {% endif %}
+  </div>
+  <div class="box">
+  <h3>Vista previa del mensaje:</h3>
+    {% if campaign.send_type == 'media' %}
+        {% if mediatype == 'image' %}
+            <img src="{{ campaign.media_url }}" alt="Imagen preview" style="max-width:100%; border-radius:4px;">
+        {% elif mediatype == 'video' %}
+            <video controls style="max-width:100%; border-radius:4px;">
+            <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
+            Tu navegador no soporta video.
+            </video>
+        {% elif mediatype == 'audio' %}
+            <audio controls>
+            <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
+            Tu navegador no soporta audio.
+            </audio>
+        {% else %}
+            <p>Archivo adjunto: <a href="{{ campaign.media_url }}">{{ campaign.media_file.name|default:"Archivo" }}</a></p>
+        {% endif %}
+    <p><strong>Caption:</strong> {{ campaign.message|linebreaksbr }}</p>
+    {% else %}
+    <p style="white-space: pre-wrap; background:#f5f5f5; padding:10px; border-radius:4px;">
+        {{ campaign.message|linebreaksbr }}
+    </p>
+    {% endif %}
+    
+    </div>
+    <h2 class="title is-5">Paso 3: Confirmá y enviá la campaña</h2>
+    <p><strong>Campaña:</strong> {{ campaign.name }}</p>
+    <button id="send-btn" class="button is-primary">Enviar campaña</button>
+
+    <div id="progress" style="margin-top: 1em;">
+    <p>Esperando para enviar...</p>
+    <ul id="log-list"></ul>
+    </div>
+  </div>
+  
+  <p style="margin-top: 1em;"><a href="{% url 'campaign_list' %}">← Volver a campañas</a></p>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  const btn = document.getElementById('send-btn');
+  const logList = document.getElementById('log-list');
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    logList.innerHTML = '';
+    progress.querySelector('p').textContent = 'Enviando mensajes...';
+
+    const campaignId = "{{ campaign.id }}";
+    const groupId = document.getElementById('group').value;
+
+    const eventSource = new EventSource(`{% url 'send_messages' %}?campaign=${campaignId}&group=${groupId}`);
+
+    eventSource.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      const li = document.createElement('li');
+      li.textContent = `${data.current}/${data.total} → ${data.contact_name} (${data.contact_phone}) - ${data.instance_name} - ${data.status}`;
+      counter.textContent = `${data.current} / ${data.total} enviados`;
+
+      if (data.status === 'error') {
+        li.style.color = 'red';
+        li.textContent += ` - ERROR: ${data.error_message}`;
+      } else {
+        li.style.color = 'green';
+      }
+      logList.appendChild(li);
+
+      if (data.current === data.total) {
+        progress.querySelector('p').textContent = 'Envío completado.';
+        eventSource.close();
+        btn.disabled = false;
+      }
+    };
+
+    eventSource.onerror = function() {
+      progress.querySelector('p').textContent = 'Error en el envío o conexión perdida.';
+      eventSource.close();
+      btn.disabled = false;
+    };
+  });
+
+  const select = document.querySelector("#group");
+  select.addEventListener("change", () => {
+    const groupId = select.value;
+    const params = new URLSearchParams(window.location.search);
+    params.set("group", groupId);
+    window.location.search = params.toString();
+  });
+</script>
+{% endblock %}
