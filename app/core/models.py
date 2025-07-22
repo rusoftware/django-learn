@@ -81,10 +81,12 @@ class MessageCampaign(models.Model):
 
     def clean(self):
         super().clean()
-        if self.send_type == 'media' and not self.media_file and not self.media_url:
+        if self.send_type == self.MEDIA and not self.media_file and not self.media_url:
             raise ValidationError("Debés subir un archivo o indicar una URL para el envío de tipo 'media'.")
-        if self.send_type == 'text' and not self.message:
+        
+        if self.send_type == self.TEXT and not self.message:
             raise ValidationError("El mensaje es obligatorio para mensajes tipo 'text'.")
+        
         if self.delay_min > self.delay_max:
             raise ValidationError("El valor mínimo de delay no puede ser mayor que el máximo.")
 
