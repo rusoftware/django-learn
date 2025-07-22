@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.conf import settings
 from time import sleep
 from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCampaign
-from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageSendForm
+from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageCampaignForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype, get_filename_from_campaign, get_int_param
 import csv
 import json
@@ -167,12 +167,12 @@ def campaign_list(request, pk=None):
         instance = None
 
     if request.method == "POST":
-        form = MessageSendForm(request.POST, request.FILES, instance=instance)
+        form = MessageCampaignForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             form.save()
             return redirect("campaign_list")
     else:
-        form = MessageSendForm(instance=instance)
+        form = MessageCampaignForm(instance=instance)
 
     return render(request, "core/campaign_list.html", {
         "current_page": "campaign_list",

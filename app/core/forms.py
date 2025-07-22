@@ -47,7 +47,7 @@ class InstanceForm(forms.ModelForm):
                 field.widget.attrs.update({'class': 'input'})
 
 
-class MessageSendForm(forms.ModelForm):
+class MessageCampaignForm(forms.ModelForm):
     class Meta:
         model = MessageCampaign
         fields = '__all__'
