@@ -4,54 +4,187 @@
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
 
 {% block content %}
-  {% load custom_filters %}
-  <h2>📢 Campañas</h2>
+{% load custom_filters %}
+<section class="section is-title-bar">
+  <div class="level">
+    <div class="level-left">
+      <div class="level-item">
+        <ul>
+          <li>Admin</li>
+          <li>Campañas</li>
+        </ul>
+      </div>
+    </div>
+    <!-- <div class="level-right">
+      <div class="level-item">
+        <div class="buttons is-right">
+          <a href="#" target="_blank" class="button is-primary">
+            <span class="icon"><i class="mdi mdi-github-circle"></i></span>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div> -->
+  </div>
+</section>
+<section class="hero is-hero-bar">
+  <div class="hero-body">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item"><h1 class="title">
+          Campañas
+        </h1></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <table class="table is-striped is-hoverable is-fullwidth">
-    <tr>
-      <th>Nombre</th>
-      <th>Tipo</th>
-      <th>Estado</th>
-      <th>Creada</th>
-      <th>Acciones</th>
-    </tr>
-    {% for campaign in campaigns %}
-      {% if not campaign|is_campaign_editable %}
-        <tr style="background-color: #ebebeb;">
-      {% endif %}
+<!-- MAIN CONTENT -->
+<section class="section is-main-section">
+  <div class="card has-table has-mobile-sort-spaced">
+    <header class="card-header">
+      <p class="card-header-title">
+        <span class="icon"><i class="mdi mdi-bullhorn-outline"></i></span>
+        Campañas
+      </p>
+    </header>
+    <div class="card-content">
+      <div class="b-table has-pagination">
+        <div class="table-wrapper has-mobile-cards">
+          <table class="table is-fullwidth is-striped is-hoverable is-sortable is-fullwidth">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Creada</th>
+                <th class="has-text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for campaign in campaigns %}
+                {% if campaign|is_campaign_editable %}
+                  <tr>
+                {% else %}
+                  <tr style="background-color: #ebebeb;">
+                {% endif %}
 
-        <td>{{ campaign.name }}</td>
-        <td>{{ campaign.get_send_type_display }}</td>
-        <td>{{ campaign.get_status_display }}</td>
-        <td>{{ campaign.created_at|date:"Y-m-d H:i" }}</td>
-        <td>
-          {% if campaign|is_campaign_editable %}
-            <a href="{% url 'campaign_edit' campaign.pk %}">✏️ Editar</a>
+                <td>{{ campaign.name }}</td>
+                <td>{{ campaign.get_send_type_display }}</td>
+                <td>{{ campaign.get_status_display }}</td>
+                <td>{{ campaign.created_at|date:"Y-m-d H:i" }}</td>
+                <td class="has-text-right">
+                  {% if campaign|is_campaign_editable %}
+                    <a href="{% url 'campaign_edit' campaign.pk %}">✏️ Editar</a>
 
-            <form method="post" action="{% url 'campaign_delete' campaign.pk %}" style="display: inline;">
-              {% csrf_token %}
-              <button type="submit" onclick="return confirm('¿Seguro que querés borrar esta campaña?')" title="Borrar" class="button is-primary">
-                🗑️
-              </button>
-            </form>
-            <a href="{% url 'campaign_send' %}?campaign={{ campaign.pk }}">Enviar</a>
-          {% endif %}
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="4">No hay campañas.</td></tr>
-    {% endfor %}
-  </table>
+                    <form method="post" action="{% url 'campaign_delete' campaign.pk %}" style="display: inline;" class="delete-form">
+                      {% csrf_token %}
+                      <button type="button" title="Borrar" class="button is-primary" onclick="openDeleteModal(this.form)">
+                      <!-- <button type="submit" onclick="return confirm('¿Seguro que querés borrar esta campaña?')" title="Borrar" class="button is-primary"> -->
+                        🗑️
+                      </button>
+                    </form>
+                    <a href="{% url 'campaign_send' %}?campaign={{ campaign.pk }}">Enviar</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4">No hay campañas.</td></tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="5" class="has-text-right">
+                  total: {{ campaigns|length }}
+                </th>
+              </tr> 
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <hr>
+  <!-- Agregar/Editar Campaña -->
+  <div class="card">
+    <header class="card-header">
+      <p class="card-header-title">
+        <span class="icon"><i class="mdi mdi-plus"></i></span>
+        Agregar Instancia
+      </p>
+    </header>
+    <div class="card-content">
+      <form method="post">
+      </form>
+    </div>
+  </div>
+</section>
+
+  <!-- MODAL -->
+  <!-- TODO: hacer el modal reutilizable -->
+  <div id="confirm-delete-modal" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">¿Confirmar borrado?</p>
+        <button class="delete" aria-label="close" onclick="closeModal()"></button>
+      </header>
+      <section class="modal-card-body">
+        ¿Seguro que querés borrar esta campaña?
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-danger" id="confirm-delete-btn">Sí, borrar</button>
+        <button class="button" onclick="closeModal()">Cancelar</button>
+      </footer>
+    </div>
+  </div>
+  <!-- END MODAL-->
+
+<!------------------------------------------------------------------------>
 
   <hr>
 
   <h3>{% if editing %}✏️ Editando campaña: {{ campaign_editing.name }}{% else %}➕ Nueva campaña{% endif %}</h3>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% if editing %}Guardar cambios{% else %}Crear campaña{% endif %}</button>
+    {% for field in form %}
+      <div class="field">
+        <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <div class="control">
+          {{ field }}
+        </div>
+        {% if field.errors %}
+          <p class="help is-danger">{{ field.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="field is-fullwidth">
+      <div class="control">
+        <button type="submit" class="button is-primary">{% if editing %}Guardar cambios{% else %}Crear campaña{% endif %}</button>
+      </div>
+    </div>
     {% if editing %}
       <a href="{% url 'campaign_list' %}" style="margin-left: 1em;">❌ Cancelar</a>
     {% endif %}
   </form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let deleteFormToSubmit = null;
+
+  function openDeleteModal(form) {
+    deleteFormToSubmit = form;
+    document.getElementById('confirm-delete-modal').classList.add('is-active');
+  }
+
+  function closeModal() {
+    document.getElementById('confirm-delete-modal').classList.remove('is-active');
+    deleteFormToSubmit = null;
+  }
+
+  document.getElementById('confirm-delete-btn').addEventListener('click', function () {
+    if (deleteFormToSubmit) deleteFormToSubmit.submit();
+  });
+</script>
 {% endblock %}

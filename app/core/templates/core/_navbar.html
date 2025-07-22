@@ -1,21 +1,72 @@
-<nav class="navbar is-light" role="navigation" aria-label="main navigation">
-  <div class="navbar-menu is-active">
-    <div class="navbar-start">
-      <a href="{% url 'contact_list' %}" class="navbar-item {% if current_page == 'contact_list' %}is-active{% endif %}">
-        👥 Contactos
-      </a>
-      <a href="{% url 'instances_list' %}" class="navbar-item {% if current_page == 'instances_list' %}is-active{% endif %}">
-        📡 Instancias
-      </a>
-      <a href="{% url 'campaign_list' %}" class="navbar-item {% if current_page == 'campaign_list' %}is-active{% endif %}">
-        📢 Campañas
-      </a>
-      <a href="{% url 'test_tools' %}" class="navbar-item {% if current_page == 'test_tools' %}is-active{% endif %}">
-        🧪 Tests
-      </a>
-      <a href="/admin/" class="navbar-item {% if current_page == 'admin' %}is-active{% endif %}">
-        ⚙️ Admin
-      </a>
-    </div>
-  </div>
-</nav>
+<p class="menu-label">General</p>
+<ul class="menu-list">
+  <li>
+    <a href="index.html" class="{% if current_page == 'dashboard' %}is-active{% endif %} router-link-active has-icon">
+      <span class="icon"><i class="mdi mdi-monitor"></i></span>
+      <span class="menu-item-label">Dashboard</span>
+    </a>
+  </li>
+</ul>
+<p class="menu-label">Gestión</p>
+<ul class="menu-list">
+  <li>
+    <a href="{% url 'contact_list' %}" class="{% if current_page == 'contact_list' %}is-active{% endif %} has-icon">
+      <span class="icon has-update-mark"><i class="mdi mdi-account-multiple-outline"></i></span>
+      <span class="menu-item-label">Contactos</span>
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'instances_list' %}" class="{% if current_page == 'instances_list' %}is-active{% endif %} has-icon">
+      <span class="icon"><i class="mdi mdi-access-point-network"></i></span>
+      <span class="menu-item-label">Instancias</span>
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'campaign_list' %}" class="{% if current_page == 'campaign_list' %}is-active{% endif %} has-icon">
+      <span class="icon"><i class="mdi mdi-bullhorn-outline"></i></span>
+      <span class="menu-item-label">Campañas</span>
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'test_tools' %}" class="{% if current_page == 'test_tools' %}is-active{% endif %} has-icon">
+      <span class="icon"><i class="mdi mdi-test-tube"></i></span>
+      <span class="menu-item-label">Tests</span>
+    </a>
+  </li>
+  <!-- <li>
+    <a class="has-icon has-dropdown-icon">
+      <span class="icon"><i class="mdi mdi-view-list"></i></span>
+      <span class="menu-item-label">Submenus</span>
+      <div class="dropdown-icon">
+        <span class="icon"><i class="mdi mdi-plus"></i></span>
+      </div>
+    </a>
+    <ul>
+      <li>
+        <a href="#void">
+          <span>Sub-item One</span>
+        </a>
+      </li>
+      <li>
+        <a href="#void">
+          <span>Sub-item Two</span>
+        </a>
+      </li>
+    </ul>
+  </li> -->
+</ul>
+<p class="menu-label">More</p>
+<ul class="menu-list">
+  <li>
+    <a href="/admin/" class="{% if current_page == 'admin' %}is-active{% endif %} router-link-active has-icon">
+      <span class="icon"><i class="mdi mdi-cog"></i></span>
+      <span class="menu-item-label">Admin</span>
+    </a>
+  </li>
+  <!-- <li>
+    <a href="https://www.linkedin.com/in/fedeteiserskis/" class="has-icon">
+      <span class="icon"><i class="mdi mdi-help-circle"></i></span>
+      <span class="menu-item-label">About</span>
+    </a>
+  </li> -->
+</ul>

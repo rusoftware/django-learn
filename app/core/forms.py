@@ -14,17 +14,37 @@ class ContactForm(forms.ModelForm):
 
 class ContactBulkForm(forms.Form):
     raw_contacts = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 10, 'cols': 80}),
-        label="Pegar contactos (name,phone,active,text_1,text_2,text_3)"
+        widget=forms.Textarea(attrs={
+            'rows': 10, 
+            'cols': 80,
+            'class': 'textarea',
+            'placeholder': 'name, phone, active, text_1, text_2, text_3\n'
+        }),
+        label="Crear Contactos"
     )
 
 class ContactCSVForm(forms.Form):
-    file = forms.FileField(label="Subir archivo CSV")
+    file = forms.FileField(label="Cargar CSV")
+
+    def clean_file(self):
+        f = self.cleaned_data['file']
+        if not f.name.lower().endswith('.csv'):
+            raise forms.ValidationError("El archivo debe tener extensión .csv")
+        return f
 
 class InstanceForm(forms.ModelForm):
     class Meta:
         model = Instance
         fields = ['description', 'api_url', 'api_key', 'instance_name', 'active']
+        widgets = {
+            'active': forms.CheckboxInput(attrs={'id': 'id_active'})
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            if name != 'active':
+                field.widget.attrs.update({'class': 'input'})
 
 class MessageSendForm(forms.ModelForm):
     class Meta:

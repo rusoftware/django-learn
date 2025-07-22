@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.conf import settings
 from time import sleep
@@ -119,7 +120,7 @@ def toggle_contact_active(request, pk):
     contact = get_object_or_404(Contact, pk=pk)
     contact.active = not contact.active
     contact.save()
-    return redirect(request.META.get("HTTP_REFERER", reverse("contact_list")))
+    return JsonResponse({'active': contact.active})
 
 
 # ================================
@@ -149,7 +150,7 @@ def toggle_instance_active(request, pk):
     instance = get_object_or_404(Instance, pk=pk)
     instance.active = not instance.active
     instance.save()
-    return redirect('instances_list')
+    return JsonResponse({'active': instance.active})
 
 
 # ================================

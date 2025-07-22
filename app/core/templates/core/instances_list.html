@@ -4,38 +4,182 @@
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
 
 {% block content %}
-  <h1>📡 Instancias</h1>
-    <table class="table is-striped is-hoverable is-fullwidth">
-        <tr>
-            <th>Description</th>
-            <th>API URL</th>
-            <th>API Key</th>
-            <th>Instance Name</th>
-            <th>Status</th>
-        </tr>
-        {% for instance in instances %}
-        <tr>
-            <td>{{ instance.description }}</td>
-            <td>{{ instance.api_url }}</td>
-            <td>{{ instance.api_key }}</td>
-            <td>{{ instance.instance_name }}</td>
-            <td>
-                <form method="post" action="{% url 'toggle_instance' instance.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="button is-primary">
-                        {% if instance.active %}🟢 Activa{% else %}🔴 Inactiva{% endif %}
-                    </button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<section class="section is-title-bar">
+  <div class="level">
+    <div class="level-left">
+      <div class="level-item">
+        <ul>
+          <li>Admin</li>
+          <li>Instancias</li>
+        </ul>
+      </div>
+    </div>
+    <!-- <div class="level-right">
+      <div class="level-item">
+        <div class="buttons is-right">
+          <a href="#" target="_blank" class="button is-primary">
+            <span class="icon"><i class="mdi mdi-github-circle"></i></span>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div> -->
+  </div>
+</section>
+<section class="hero is-hero-bar">
+  <div class="hero-body">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item"><h1 class="title">
+          Instancias
+          <span class="subtitle is-6">Lista de instancias de API</span>
+        </h1></div>
+      </div>
+      <div class="level-right" style="display: block;">
+        <div class="level-item">
+          <a href="https://doc.evolution-api.com/v1/en/get-started/introduction" target="_blank" title="evolution-api" >
+            <img src="https://mintlify.s3.us-west-1.amazonaws.com/atendai-eb1f2775/images/brand/cover.png" alt="Instancias" style="height: 26px; width: auto;" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <hr>
-    <h2>Agregar Instancia</h2>
-    <form method="post">
+<!-- MAIN CONTENT -->
+<section class="section is-main-section">
+  <div class="card has-table has-mobile-sort-spaced">
+    <header class="card-header">
+      <p class="card-header-title">
+        <span class="icon"><i class="mdi mdi-access-point-network"></i></span>
+        Instancias
+      </p>
+    </header>
+    <div class="card-content">
+      <div class="b-table has-pagination">
+        <div class="table-wrapper has-mobile-cards">
+          <table class="table is-fullwidth is-striped is-hoverable is-sortable is-fullwidth">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>API URL</th>
+                <th>API Key</th>
+                <th>Instance Name</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for instance in instances %}
+              <tr>
+                <td>{{ instance.description }}</td>
+                <td>{{ instance.api_url }}</td>
+                <td>{{ instance.api_key }}</td>
+                <td>{{ instance.instance_name }}</td>
+                <td>
+                  <form class="toggle-instance-form" data-url="{% url 'toggle_instance' instance.pk %}">
+                    {% csrf_token %}
+                    <div class="field-body">
+                      <div class="field">
+                        <div class="control">
+                          <label class="switch is-rounded is-small">
+                            <input type="checkbox" {% if instance.active %}checked{% endif %}>
+                            <span class="check"></span>
+                            <!-- <span class="control-label">{% if contact.active %}Activo{% else %}Inactivo{% endif %}</span> -->
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <header class="card-header">
+      <p class="card-header-title">
+        <span class="icon"><i class="mdi mdi-plus"></i></span>
+        Agregar Instancia
+      </p>
+    </header>
+    <div class="card-content">
+      <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="button is-primary">Guardar</button>
-    </form>
+        {% for field in form %}
+          {% if field.name != 'active' %}
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  {{ field }}
+                </div>
+                {% if field.errors %}
+                  <p class="help is-danger">{{ field.errors|striptags }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+        <div class="field has-check is-horizontal">
+          <div class="field-label">
+            <label class="label" for="id_active">Estado</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <label class="b-checkbox checkbox">
+                  {{ form.active }}
+                  <span class="check is-primary"></span>
+                  <span class="control-label">Activo</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <button type="submit" class="button is-primary">Guardar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* Toggle contact active state with AJAX */
+  document.querySelectorAll('.toggle-instance-form').forEach(form => {
+    const checkbox = form.querySelector('input[type="checkbox"]');
+    const url = form.dataset.url;
+    const csrf = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+    checkbox.addEventListener('change', async () => {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrf,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+      } else {
+        checkbox.checked = !checkbox.checked;
+      }
+    });
+  });
+</script>
+{% endblock %}
+
