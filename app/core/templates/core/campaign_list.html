@@ -106,69 +106,92 @@
   
   <hr>
   <!-- Agregar/Editar Campaña -->
+  {% if form.non_field_errors %}
+  <div class="notification is-danger">
+      <button class="delete" onclick="this.parentElement.style.display='none';"></button>
+      <ul>
+      {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+  </div>
+  {% endif %}
+
   <div class="card">
     <header class="card-header">
       <p class="card-header-title">
-        <span class="icon"><i class="mdi mdi-plus"></i></span>
-        Agregar Instancia
+        {% if editing %}
+          <span class="icon"><i class="mdi mdi-pencil-outline"></i></span>
+          Editando campaña: {{ campaign_editing.name }}
+        {% else %}
+          <span class="icon"><i class="mdi mdi-plus"></i></span>
+          Nueva Campaña de Whatsapp
+        {% endif %}
       </p>
     </header>
     <div class="card-content">
-      <form method="post">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="field is-horizontal">
+            <div class="field-label is-normal">
+              <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+            <div class="field-body">
+              <div class="field">
+                <div class="control">
+                  {% if field.field.widget|classname == "Select" %}
+                  <div class="select is-fullwidth">
+                    {{ field }}
+                  </div>
+                  {% else %}
+                    {{ field }}
+                  {% endif %}
+                </div>
+                {% if field.errors %}
+                  <p class="help is-danger">{{ field.errors|striptags }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        
+        <hr>
+        
+        <div class="field is-fullwidth">
+          <div class="control">
+            <button type="submit" class="button is-primary">{% if editing %}Guardar cambios{% else %}Crear campaña{% endif %}</button>
+          </div>
+        </div>
+        {% if editing %}
+          <a href="{% url 'campaign_list' %}" style="margin-left: 1em;">❌ Cancelar</a>
+        {% endif %}
       </form>
     </div>
   </div>
 </section>
 
-  <!-- MODAL -->
-  <!-- TODO: hacer el modal reutilizable -->
-  <div id="confirm-delete-modal" class="modal">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <header class="modal-card-head">
-        <p class="modal-card-title">¿Confirmar borrado?</p>
-        <button class="delete" aria-label="close" onclick="closeModal()"></button>
-      </header>
-      <section class="modal-card-body">
-        ¿Seguro que querés borrar esta campaña?
-      </section>
-      <footer class="modal-card-foot">
-        <button class="button is-danger" id="confirm-delete-btn">Sí, borrar</button>
-        <button class="button" onclick="closeModal()">Cancelar</button>
-      </footer>
-    </div>
+<!-- MODAL -->
+<!-- TODO: hacer el modal reutilizable -->
+<div id="confirm-delete-modal" class="modal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">¿Confirmar borrado?</p>
+      <button class="delete" aria-label="close" onclick="closeModal()"></button>
+    </header>
+    <section class="modal-card-body">
+      ¿Seguro que querés borrar esta campaña?
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-danger" id="confirm-delete-btn">Sí, borrar</button>
+      <button class="button" onclick="closeModal()">Cancelar</button>
+    </footer>
   </div>
-  <!-- END MODAL-->
+</div>
+<!-- END MODAL-->
 
-<!------------------------------------------------------------------------>
-
-  <hr>
-
-  <h3>{% if editing %}✏️ Editando campaña: {{ campaign_editing.name }}{% else %}➕ Nueva campaña{% endif %}</h3>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% for field in form %}
-      <div class="field">
-        <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        <div class="control">
-          {{ field }}
-        </div>
-        {% if field.errors %}
-          <p class="help is-danger">{{ field.errors|striptags }}</p>
-        {% endif %}
-      </div>
-    {% endfor %}
-    <div class="field is-fullwidth">
-      <div class="control">
-        <button type="submit" class="button is-primary">{% if editing %}Guardar cambios{% else %}Crear campaña{% endif %}</button>
-      </div>
-    </div>
-    {% if editing %}
-      <a href="{% url 'campaign_list' %}" style="margin-left: 1em;">❌ Cancelar</a>
-    {% endif %}
-  </form>
 {% endblock %}
-
 {% block extra_scripts %}
 <script>
   let deleteFormToSubmit = null;

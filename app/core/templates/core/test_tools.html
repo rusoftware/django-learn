@@ -4,12 +4,50 @@
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
 
 {% block content %}
-<h1>🧪 Herramientas de prueba de envío</h1>
+<section class="section is-title-bar">
+  <div class="level">
+    <div class="level-left">
+      <div class="level-item">
+        <ul>
+          <li>Admin</li>
+          <li>Tests</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="hero is-hero-bar">
+  <div class="hero-body">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item"><h1 class="title">
+          Testing utilities
+        </h1></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<button class="button is-primary" onclick="sendTest('text')">Enviar mensaje de texto</button>
-<button class="button is-primary" onclick="sendTest('media')">Enviar mensaje con media</button>
+<!-- MAIN CONTENT -->
+<section class="section is-main-section">
+  <div class="card">
+    <header class="card-header">
+      <p class="card-header-title">
+        <span class="icon"><i class="mdi mdi-test-tube"></i></span>
+        Herramientas de prueba de envío
+      </p>
+    </header>
+    <div class="card-content">
+      <button class="button is-primary" onclick="sendTest('text')">Enviar mensaje de texto</button>
+      <button class="button is-primary" onclick="sendTest('media')">Enviar mensaje con media</button>
+      <hr>
+      <div id="test-result" style="margin-top: 20px; font-family: monospace;"></div>
+    </div>
+  </div>
+</section>
 
-<div id="test-result" style="margin-top: 20px; font-family: monospace;"></div>
+<!--------------------------------->
+
 {% endblock %}
 
 {% block extra_scripts %}
