@@ -194,6 +194,38 @@
 {% endblock %}
 {% block extra_scripts %}
 <script>
+  // Disable MEDIA fields if campaign type = TEXT
+  document.addEventListener('DOMContentLoaded', function () {
+    const sendTypeSelect = document.querySelector('#id_send_type');
+    const mediaFileInput = document.querySelector('#id_media_file');
+    const mediaUrlInput = document.querySelector('#id_media_url');
+    const mediaFileName = document.querySelector('#id_filename');
+    const mediaFields = [mediaFileInput, mediaUrlInput, mediaFileName];
+
+    function toggleMediaFields() {
+      if (sendTypeSelect.value === 'media') {
+        mediaFields.forEach(field => {
+          field.disabled = false;
+        });
+      } else {
+        mediaFields.forEach(field => {
+          field.disabled = true;
+        });
+      }
+    }
+
+    sendTypeSelect.addEventListener('change', toggleMediaFields);
+    toggleMediaFields(); // Initial call to set the state
+  });
+
+  // Close modal when clicking outside or on the close button
+  document.querySelectorAll('.modal-background, .modal-close, .jb-modal-close').forEach(el => {
+    el.addEventListener('click', function() {
+      this.closest('.modal').classList.remove('is-active');
+    });
+  });
+
+  // Delete Campaign Modal functionality
   let deleteFormToSubmit = null;
 
   function openDeleteModal(form) {

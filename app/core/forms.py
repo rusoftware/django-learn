@@ -76,7 +76,8 @@ class MessageCampaignForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        self.fields['status'].required = False
+        
         # Si ya hay una imagen, hacemos media_url solo lectura
         # if self.instance and self.instance.pk and self.instance.image_file:
         #     self.fields['media_url'].disabled = True
