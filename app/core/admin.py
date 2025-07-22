@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import ContactGroup, Contact, Instance, MessageCampaign, MessageHistory
-from .forms import MessageSendForm
+from .forms import MessageCampaignForm
 
 admin.site.register(ContactGroup)
 # admin.site.register(Contact)
@@ -19,8 +19,8 @@ class InstanceAdmin(admin.ModelAdmin):
     list_filter = ('active',)
 
 @admin.register(MessageCampaign)
-class MessageSendAdmin(admin.ModelAdmin):
-    form = MessageSendForm
+class MessageCampaignAdmin(admin.ModelAdmin):
+    form = MessageCampaignForm
     list_display = ("name", "send_type", "created_at", "media_url", "filename")
     list_filter = ("send_type", "created_at")
     search_fields = ("name", "message", "filename")

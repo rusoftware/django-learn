@@ -1,27 +1,53 @@
-<header class="has-background-light py-4 mb-2">
-  <div class="container">
-    <div class="columns is-vcentered is-mobile is-multiline">
-      
-      <!-- Logo y título -->
-      <div class="column is-narrow">
-        <span style="font-size: 2.5rem;">📣</span>
-      </div>
-      <div class="column is-two-thirds">
-        <h1 class="title is-3 has-text-primary mb-1">{{ APP_NAME }}</h1>
-        <p class="subtitle is-6 has-text-grey">Domina tus campañas de WhatsApp</p>
-      </div>
-
-      <!-- Estado del sistema o usuario -->
-      <div class="column has-text-right">
-        {% if request.user.is_authenticated %}
-          <p class="is-size-7 has-text-grey-dark">
-            👤 {{ request.user.username }}
-          </p>
-        {% else %}
-          <p class="is-size-7 has-text-grey-light">No autenticado</p>
-        {% endif %}
-      </div>
-
-    </div>
+<div class="navbar-brand">
+  <a class="navbar-item is-hidden-desktop jb-aside-mobile-toggle">
+    <span class="icon"><i class="mdi mdi-forwardburger mdi-24px"></i></span>
+  </a>
+  <div class="navbar-item has-control">
+    <div class="control"><input placeholder="Search everywhere..." class="input"></div>
   </div>
-</header>
+</div>
+<div class="navbar-brand is-right">
+  <a class="navbar-item is-hidden-desktop jb-navbar-menu-toggle" data-target="navbar-menu">
+    <span class="icon"><i class="mdi mdi-dots-vertical"></i></span>
+  </a>
+</div>
+<div class="navbar-menu fadeIn animated faster" id="navbar-menu">
+  <div class="navbar-end">
+    {% if request.user.is_authenticated %}
+    <div class="navbar-item has-dropdown has-dropdown-with-icons has-divider has-user-avatar is-hoverable">
+      <a class="navbar-link is-arrowless">
+        <!-- <div class="is-user-avatar">
+          <img src="https://avatars.dicebear.com/v2/initials/john-doe.svg" alt="John Doe">
+        </div> -->
+        <div class="is-user-name"><span>{{ request.user.username }}</span></div>
+        <span class="icon"><i class="mdi mdi-chevron-down"></i></span>
+      </a>
+      <div class="navbar-dropdown">
+        <a href="profile.html" class="navbar-item">
+          <span class="icon"><i class="mdi mdi-account"></i></span>
+          <span>My Profile</span>
+        </a>
+        <a class="navbar-item">
+          <span class="icon"><i class="mdi mdi-settings"></i></span>
+          <span>Settings</span>
+        </a>
+        <a class="navbar-item">
+          <span class="icon"><i class="mdi mdi-email"></i></span>
+          <span>Messages</span>
+        </a>
+        <hr class="navbar-divider">
+        <a class="navbar-item">
+          <span class="icon"><i class="mdi mdi-logout"></i></span>
+          <span>Log Out</span>
+        </a>
+      </div>
+    </div>
+    {% else %}
+      <p class="is-size-7 has-text-grey-light">No autenticado</p>
+    {% endif %}
+    <a title="Log out" class="navbar-item is-desktop-icon-only">
+      <span class="icon"><i class="mdi mdi-logout"></i></span>
+      <span>Log out</span>
+    </a>
+  </div>
+</div>

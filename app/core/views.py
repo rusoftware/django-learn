@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.conf import settings
 from time import sleep
 from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCampaign
-from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageSendForm
+from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageCampaignForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype, get_filename_from_campaign, get_int_param
 import csv
 import json
@@ -119,7 +120,7 @@ def toggle_contact_active(request, pk):
     contact = get_object_or_404(Contact, pk=pk)
     contact.active = not contact.active
     contact.save()
-    return redirect(request.META.get("HTTP_REFERER", reverse("contact_list")))
+    return JsonResponse({'active': contact.active})
 
 
 # ================================
@@ -149,7 +150,7 @@ def toggle_instance_active(request, pk):
     instance = get_object_or_404(Instance, pk=pk)
     instance.active = not instance.active
     instance.save()
-    return redirect('instances_list')
+    return JsonResponse({'active': instance.active})
 
 
 # ================================
@@ -166,12 +167,12 @@ def campaign_list(request, pk=None):
         instance = None
 
     if request.method == "POST":
-        form = MessageSendForm(request.POST, request.FILES, instance=instance)
+        form = MessageCampaignForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             form.save()
             return redirect("campaign_list")
     else:
-        form = MessageSendForm(instance=instance)
+        form = MessageCampaignForm(instance=instance)
 
     return render(request, "core/campaign_list.html", {
         "current_page": "campaign_list",
