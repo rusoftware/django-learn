@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
+    path('home/', views.home, name='home'),
     path('contacts/', views.contact_list, name='contact_list'),
     path('instances/', views.instances_list, name='instances_list'),
     path("campaigns/", views.campaign_list, name="campaign_list"),
@@ -13,6 +14,7 @@ urlpatterns = [
     path("campaigns/<int:pk>/delete/", views.campaign_delete, name="campaign_delete"),
     path('campaigns/send/', views.campaign_send, name='campaign_send'),
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
+    path('check-instance-status/<str:instance_name>/', views.check_instance_status, name='check_instance_status'),
     path('contacts/<int:pk>/toggle/', views.toggle_contact_active, name='toggle_contact'),
     # test endpoints and view
     path("test-tools/", views.test_tools_view, name="test_tools"),

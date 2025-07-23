@@ -1,7 +1,7 @@
 <p class="menu-label">General</p>
 <ul class="menu-list">
   <li>
-    <a href="index.html" class="{% if current_page == 'dashboard' %}is-active{% endif %} router-link-active has-icon">
+    <a href="{% url 'home' %}" class="{% if current_page == 'dashboard' %}is-active{% endif %} router-link-active has-icon">
       <span class="icon"><i class="mdi mdi-monitor"></i></span>
       <span class="menu-item-label">Dashboard</span>
     </a>

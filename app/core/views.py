@@ -4,13 +4,23 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.conf import settings
+from django.db.models import Count, Q
 from time import sleep
 from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCampaign
 from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageCampaignForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype, get_filename_from_campaign, get_int_param
 import csv
 import json
+import requests
 from io import TextIOWrapper
+
+# ================================
+# Página de inicio
+# ================================
+def home(request):
+    return render(request, 'core/home.html', {
+        'current_page': 'home'
+    })
 
 # ================================
 # Listado de contactos
@@ -152,16 +162,39 @@ def toggle_instance_active(request, pk):
     instance.save()
     return JsonResponse({'active': instance.active})
 
+def check_instance_status(request, instance_name):
+    try:
+        url = f"https://prueba2-evolution-api.jbdb3h.easypanel.host/instance/connectionState/{instance_name}"
+        headers = {"apikey": settings.EVOLUTION_API_KEY}
+        response = requests.get(url, headers=headers)
+        return JsonResponse(response.json())
+    except requests.RequestException as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 # ================================
 # Listado de campañas
 # ================================
 def campaign_list(request, pk=None):
-    campaigns = MessageCampaign.objects.all().order_by("-created_at")
+    #campaigns = MessageCampaign.objects.all().order_by("-created_at")
+    editable_campaigns = MessageCampaign.objects.filter(
+        status__in=["unsent", "error"]
+    ).order_by("-created_at")
+
+    sent_campaigns = MessageCampaign.objects.exclude(
+        status__in=["unsent", "error"]
+    ).order_by("-created_at")[:5]
+
+    sent_campaigns = sent_campaigns.annotate(
+        success_count=Count('messagehistory', filter=Q(messagehistory__status='success')),
+        error_count=Count('messagehistory', filter=Q(messagehistory__status='error')),
+    )
+
+    campaigns = list(editable_campaigns) + list(sent_campaigns)
+    campaigns.sort(key=lambda c: c.created_at, reverse=True)
 
     if pk:
         instance = get_object_or_404(MessageCampaign, pk=pk)
-        if instance.status not in ("unsent", "error"):
+        if instance.status not in (MessageCampaign.STATUS_UNSENT, MessageCampaign.STATUS_ERROR):
             return redirect("campaign_list")
     else:
         instance = None
@@ -189,7 +222,7 @@ def campaign_list(request, pk=None):
 def campaign_delete(request, pk):
     campaign = get_object_or_404(MessageCampaign, pk=pk)
 
-    if campaign.status not in ("unsent", "error"):
+    if campaign.status not in (MessageCampaign.STATUS_UNSENT, MessageCampaign.STATUS_ERROR):
         # Opcional: no permitir borrar campañas ya enviadas
         return redirect("campaign_list")
 
