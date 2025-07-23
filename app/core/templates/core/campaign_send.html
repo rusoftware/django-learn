@@ -4,107 +4,298 @@
 {% block meta_description %}Seleccioná grupo e instancias para enviar la campaña {{ campaign.name }}.{% endblock %}
 
 {% block content %}
-  <h2>Enviar campaña: {{ campaign.name }}</h2>
-<div class="box">
-    <h2 class="title is-5">Paso 1: Seleccioná un grupo de contactos</h2>
-    <form method="get">
-      <div class="field">
-        <label class="label" for="group">Grupo</label>
-        <div class="control">
+<section class="section is-title-bar">
+  <div class="level">
+    <div class="level-left">
+      <div class="level-item">
+        <ul>
+          <li>Admin</li>
+          <li>Enviar Campaña</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="hero is-hero-bar">
+  <div class="hero-body" style="background-color: aquamarine;">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item"><h1 class="title">
+          <span class="has-text-weight-normal" style="font-size: .8em;">Campaña Seleccionada: </span>{{ campaign.name }}
+        </h1></div>
+      </div>
+      <div class="level-right" style="display: block;">
+        <div class="level-item">
+          <a href="{% url 'campaign_list' %}">← Volver a campañas</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<section class="section is-main-section">
+  <!-- step 1 -->
+  <div class="card">
+    <header class="card-header">
+      <p class="card-header-title">
+        Configuración y envía tu campaña
+      </p>
+      <p class="card-header-icon">
+        <img src="https://static.whatsapp.net/rsrc.php/yZ/r/JvsnINJ2CZv.svg" alt="WhatsApp" style="height: 22px;">
+      </p>
+    </header>
+    <div class="card-content">
+      <div class="columns is-centered">
+        <!-- Configuración del envio} -->
+        <div class="column is-one-quarter has-background-white-bis">
+          <p class="has-text-weight-bold">Seleccioná Grupo Destinatario:</p>
           <div class="select is-fullwidth">
             <select name="group" id="group" onchange="this.form.submit()">
               {% for group in groups %}
-                <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>{{ group.name }}</option>
+              <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>{{ group.name }}</option>
               {% endfor %}
             </select>
           </div>
+          
+          <hr>
+          <p class="has-text-weight-bold">Contactos Seleccionados:</p>
+          <div class="facepile">
+            {% for contact in contacts|slice:":3" %}
+              <div class="avatar-initial" title="{{ contact.name }} ({{ contact.phone }})">
+                {{ contact.name|slice:":1"|upper }}
+              </div>
+            {% endfor %}
+
+            {% if contacts|length > 3 %}
+              <a title="ver todos los destinatarios" onclick="document.getElementById('recipient-modal').classList.add('is-active')">
+                +{{ contacts|length|add:"-3" }} más
+              </a>
+            {% endif %}
+          </div>
+
+          <hr>
+          
+          <p class="has-text-weight-bold">
+            Instancias que se Utilizaran:
+            <span class="is-small" style="float: right;">
+              <a href="{% url 'instances_list' %}" class="is-small">cambiar</a>
+            </span>
+          </p>
+          {% if instances %}
+          <table class="table is-fullwidth is-small is-striped">
+            <thead>
+              <tr>
+                <th>Instancia</th>
+                <th>EvoApi Name</th>
+                <th class="has-text-right">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for instance in instances %}
+              <tr data-instance="{{ instance.instance_name }}">
+                <td>{{ instance.description }}</td>
+                <td>{{ instance.instance_name }}</td>
+                <td class="status-tag has-text-right">
+                  <span class="tag is-info">wait...</span>
+                </td>
+              </tr>
+
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+            <p>No hay instancias disponibles para enviar mensajes.</p>
+          {% endif %}
+          
+          <hr>
+          <p>Tipo de envío: <strong>{{ campaign.send_type }}</strong></p>
+        </div>
+
+        <!-- Preview del mensaje -->
+        <div class="column is-one-quarter has-background-white-ter">
+          <p class="has-text-weight-bold">Preview del Mensaje:</p>
+          <div class="box whatsapp-preview">
+            {% if campaign.send_type == 'media' %}
+              {% if mediatype == 'image' %}
+              <figure class="image mb-2">
+                <img src="{{ campaign.media_url }}" style="border-radius: 8px;">
+              </figure>
+              <!-- <img src="{{ campaign.media_url }}" alt="Imagen preview" style="max-width:100%; border-radius:4px;"> -->
+              {% elif mediatype == 'video' %}
+              <video controls style="max-width:100%; border-radius:4px;">
+              <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
+                Tu navegador no soporta video.
+              </video>
+              {% elif mediatype == 'audio' %}
+              <audio controls>
+              <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
+                Tu navegador no soporta audio.
+              </audio>
+              {% else %}
+              <p>Archivo adjunto: <a href="{{ campaign.media_url }}">{{ campaign.media_file.name|default:"Archivo" }}</a></p>
+              {% endif %}
+            {% endif %}
+            <div class="whatsapp-message">
+              {{ campaign.message|linebreaksbr }}
+            </div>
+            <p class="has-text-grey is-size-7 has-text-right mt-2" style="margin-bottom: 0;">
+              <span id="time">12:45</span>
+              <span class="icon is-small">
+                <i class="mdi mdi-check-all has-text-primary" style="transform: scale(1.2) translateY(0.2px);"></i>
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div class="column is-two-quarter has-background-grey-soft">
+          <div class="notification is-info" id="instructionsPanel">
+            <p class="title is-4">¿Cómo funciona?</p>
+            <p class="subtitle is-6">Crea campañas para enviar mensajes a grupos de contactos.</p>
+            <ul>
+              <li>1. Selecciona un grupo de contactos y revisa la configuración.</li>
+              <li>2. Revisa el contenido del mensaje.</li>
+              <li>3. Envía la campaña y comprueba el progreso en tiempo real.</li>
+            </ul>
+          </div>
+
+          <!-- Estado del envío -->
+          <div id="sendStatusPanel" class="box" style="display: none;">
+            <div class="columns is-fullwidth">
+              <div class="column is-three-quarters">
+                <h4 class="title is-6">Estado del envío</h4>
+              </div>
+              <div class="column is-one-quarter has-text-right">
+                <p id="campaignCounter" class="mb-3">Enviando 0 / {{ contacts|length }}...</p>
+              </div>
+            </div>
+            
+
+            <!-- Progreso general -->
+            <progress id="campaignProgressBar" class="progress is-success" value="0" max="100">
+              0%
+            </progress>
+
+            <!-- Resumen -->
+           
+
+            <!-- Detalle por contacto -->
+            <div class="table-container scrollable-table">
+            <table class="table is-fullwidth is-size-7 is-striped is-hoverable">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Usuario</th>
+                  <th>Teléfono</th>
+                  <th>Instancia</th>
+                  <th>Resultado</th>
+                </tr>
+              </thead>
+              <tbody id="campaignResults">
+                <!-- JS irá llenando esto dinámicamente -->
+              </tbody>
+            </table>
+            </div>
+          </div>
         </div>
       </div>
-    </form>
+    </div>
+    <div class="card-footer">
+      <div class="card-footer-item">
+        <button id="sendBtn" class="button is-primary">Enviar campaña</button>
+      </div>
+    </div>
   </div>
-  <div class="box">
-    <h2 class="title is-5">Paso 2: Verificá los contactos del grupo</h2>
-    {% if contacts %}
+</section>
+
+
+<!-- Modal for recipients -->
+<div class="modal" id="recipient-modal">
+  <div class="modal-background" onclick="closeModal()"></div>
+  <div class="modal-card" style="width: 600px; max-height: 80vh;">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Destinatarios del grupo: <b>{{ selected_group.name }}</b></p>
+      <button class="delete" aria-label="close" onclick="closeModal()"></button>
+    </header>
+
+    <section class="modal-card-body" style="overflow-y: auto;">
+      {% if contacts %}
       <ul>
         {% for contact in contacts %}
-          <li>{{ contact.name }} - {{ contact.phone }}</li>
+        <li><b>{{ contact.name }}</b> - {{ contact.phone }}</li>
         {% endfor %}
       </ul>
-    {% else %}
+      {% else %}
       <p>No hay contactos en este grupo.</p>
-    {% endif %}
-  </div>
-  <div class="box">
-  <h3>Vista previa del mensaje:</h3>
-    {% if campaign.send_type == 'media' %}
-        {% if mediatype == 'image' %}
-            <img src="{{ campaign.media_url }}" alt="Imagen preview" style="max-width:100%; border-radius:4px;">
-        {% elif mediatype == 'video' %}
-            <video controls style="max-width:100%; border-radius:4px;">
-            <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
-            Tu navegador no soporta video.
-            </video>
-        {% elif mediatype == 'audio' %}
-            <audio controls>
-            <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
-            Tu navegador no soporta audio.
-            </audio>
-        {% else %}
-            <p>Archivo adjunto: <a href="{{ campaign.media_url }}">{{ campaign.media_file.name|default:"Archivo" }}</a></p>
-        {% endif %}
-    <p><strong>Caption:</strong> {{ campaign.message|linebreaksbr }}</p>
-    {% else %}
-    <p style="white-space: pre-wrap; background:#f5f5f5; padding:10px; border-radius:4px;">
-        {{ campaign.message|linebreaksbr }}
-    </p>
-    {% endif %}
-    
-    </div>
-    <h2 class="title is-5">Paso 3: Confirmá y enviá la campaña</h2>
-    <p><strong>Campaña:</strong> {{ campaign.name }}</p>
-    <button id="send-btn" class="button is-primary">Enviar campaña</button>
+      {% endif %}
+    </section>
 
-    <div id="progress" style="margin-top: 1em;">
-    <p>Esperando para enviar...</p>
-    <ul id="log-list"></ul>
-    </div>
+    <footer class="modal-card-foot">
+      <button class="button is-success" onclick="closeModal()">Cerrar</button>
+    </footer>
   </div>
-  
-  <p style="margin-top: 1em;"><a href="{% url 'campaign_list' %}">← Volver a campañas</a></p>
+</div>
 {% endblock %}
+
 {% block extra_scripts %}
 <script>
-  const btn = document.getElementById('send-btn');
-  const logList = document.getElementById('log-list');
-  const progress = document.getElementById('progress');
-  const counter = document.getElementById('counter');
+  // Mostrar la hora actual en la previsualización
+  document.getElementById('time').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // Configurar el botón de envío y el EventSource
+  const btn = document.getElementById('sendBtn');
+  const instructionsPanel = document.getElementById('instructionsPanel');
+  const sendStatusPanel = document.getElementById('sendStatusPanel');
+  const counter = document.getElementById('campaignCounter');
+  const progressBar = document.getElementById('campaignProgressBar');
+  const resultsBody = document.getElementById('campaignResults');
 
   btn.addEventListener('click', () => {
     btn.disabled = true;
-    logList.innerHTML = '';
-    progress.querySelector('p').textContent = 'Enviando mensajes...';
+    sendStatusPanel.style.display = 'block';
+    instructionsPanel.style.display = 'none';
+    resultsBody.innerHTML = '';
+    counter.textContent = 'Iniciando envío de mensajes...';
 
     const campaignId = "{{ campaign.id }}";
     const groupId = document.getElementById('group').value;
 
-    const eventSource = new EventSource(`{% url 'send_messages' %}?campaign=${campaignId}&group=${groupId}`);
+    // Mock EventSource for testing purposes
+    // Uncomment the next line to use the real EventSource when ready and remove the MockEventSource class below
+    //const eventSource = new EventSource(`{% url 'send_messages' %}?campaign=${campaignId}&group=${groupId}`);
+    const eventSource = new MockEventSource('mock');
 
     eventSource.onmessage = function(event) {
       const data = JSON.parse(event.data);
-      const li = document.createElement('li');
-      li.textContent = `${data.current}/${data.total} → ${data.contact_name} (${data.contact_phone}) - ${data.instance_name} - ${data.status}`;
-      counter.textContent = `${data.current} / ${data.total} enviados`;
+      const row = document.createElement('tr');
+
+      const badge = document.createElement('span');
+      badge.className = 'tag is-success';
+      badge.textContent = data.status;
 
       if (data.status === 'error') {
-        li.style.color = 'red';
-        li.textContent += ` - ERROR: ${data.error_message}`;
-      } else {
-        li.style.color = 'green';
+        badge.className = 'tag is-danger';
+        badge.title += ` - ERROR: ${data.error_message}`;
       }
-      logList.appendChild(li);
+
+      row.innerHTML = `
+        <td>${data.current}/${data.total}</td>
+        <td>${data.contact_name}</td>
+        <td>${data.contact_phone}</td>
+        <td>${data.instance_name}</td>
+        <td>${badge.outerHTML}</td>
+      `;
+
+      counter.textContent = `Enviando ${data.current} / ${data.total}...`;
+      progressBar.value = (data.current / data.total) * 100;
+      progressBar.textContent = `${Math.round(progressBar.value)}%`;
+
+      
+      resultsBody.appendChild(row);
 
       if (data.current === data.total) {
-        progress.querySelector('p').textContent = 'Envío completado.';
+        counter.textContent = 'Envío completado.';
         eventSource.close();
         btn.disabled = false;
       }
@@ -117,6 +308,7 @@
     };
   });
 
+  // Handle group selection change
   const select = document.querySelector("#group");
   select.addEventListener("change", () => {
     const groupId = select.value;
@@ -124,5 +316,129 @@
     params.set("group", groupId);
     window.location.search = params.toString();
   });
+
+  // Close modal function
+  function closeModal() {
+    document.getElementById('recipient-modal').classList.remove('is-active');
+  }
+
+  // Update instance statuses
+  const rows = document.querySelectorAll('tr[data-instance]');
+
+  const fetches = Array.from(rows).map(row => {
+    const instanceName = row.dataset.instance;
+    const statusCell = row.querySelector('.status-tag');
+
+    return fetch(`/check-instance-status/${instanceName}/`)
+      .then(res => res.json())
+      .then(data => {
+        const state = data?.instance?.state || 'unknown';
+        let html = '';
+        if (state === 'open') {
+          html = `<span class="tag is-success">Conectada</span>`;
+        } else if (state === 'close') {
+          html = `<span class="tag is-danger">Desconectada</span>`;
+        } else {
+          html = `<span class="tag is-warning">${state}</span>`;
+        }
+        statusCell.innerHTML = html;
+      })
+      .catch(() => {
+        statusCell.innerHTML = `<span class="tag is-warning">error</span>`;
+      });
+  });
+
+  /****************************************************************/
+/* Mock EventSource for testing purposes */
+class MockEventSource extends EventTarget {
+  constructor(url) {
+    super();
+    this.url = url;
+    this.current = 0;
+    this.total = 10;
+
+    // Simular datos periódicos
+    this.interval = setInterval(() => {
+      if (this.current >= this.total) {
+        this.close();
+        return;
+      }
+
+      this.current++;
+
+      const fakeData = {
+        status: Math.random() > 0.3 ? 'success' : 'error',
+        error_message: 'Simulated error',
+        current: this.current,
+        total: this.total,
+        contact_name: 'Test User',
+        contact_phone: '+123456789',
+        instance_name: 'FakeInstance'
+      };
+
+      const event = new MessageEvent('message', {
+        data: JSON.stringify(fakeData)
+      });
+
+      if (typeof this.onmessage === 'function') {
+        this.onmessage(event);
+      }
+      this.dispatchEvent(event);
+    }, 1000);
+  }
+
+  close() {
+    clearInterval(this.interval);
+  }
+}
+
 </script>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .facepile {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .avatar-initial {
+    background-color: #00d1b2;
+    color: white;
+    font-weight: bold;
+    border-radius: 9999px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+
+  .facepile .avatar-initial:nth-child(1) {
+    background-color: hsl(204, 86%, 53%);
+  }
+  .facepile .avatar-initial:nth-child(2) {
+    background-color: hsl(217, 71%, 53%);
+    margin-left: -14px !important;
+  }
+  .facepile .avatar-initial:nth-child(3) {
+    background-color: hsl(171, 100%, 41%);
+    margin-left: -14px !important;
+  }
+
+  .scrollable-table {
+    max-height: 380px;
+    overflow-y: auto;
+  }
+
+  .scrollable-table thead th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 2;
+  }
+</style>
 {% endblock %}

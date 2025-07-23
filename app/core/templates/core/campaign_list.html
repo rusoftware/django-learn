@@ -66,7 +66,7 @@
                 {% if campaign|is_campaign_editable %}
                   <tr>
                 {% else %}
-                  <tr style="background-color: #ebebeb;">
+                  <tr class="has-text-grey">
                 {% endif %}
 
                 <td>{{ campaign.name }}</td>
@@ -75,16 +75,27 @@
                 <td>{{ campaign.created_at|date:"Y-m-d H:i" }}</td>
                 <td class="has-text-right">
                   {% if campaign|is_campaign_editable %}
-                    <a href="{% url 'campaign_edit' campaign.pk %}">✏️ Editar</a>
+                    <a href="{% url 'campaign_edit' campaign.pk %}#campaignForm" class="button is-small is-info" title="Editar">
+                      <span class="icon is-small"><i class="mdi mdi-pencil"></i></span>
+                    </a>
 
-                    <form method="post" action="{% url 'campaign_delete' campaign.pk %}" style="display: inline;" class="delete-form">
+                    <form method="post" action="{% url 'campaign_delete' campaign.pk %}" style="display: inline;">
                       {% csrf_token %}
-                      <button type="button" title="Borrar" class="button is-primary" onclick="openDeleteModal(this.form)">
-                      <!-- <button type="submit" onclick="return confirm('¿Seguro que querés borrar esta campaña?')" title="Borrar" class="button is-primary"> -->
-                        🗑️
+                      <button type="button" title="Borrar" class="button is-small is-danger" onclick="openDeleteModal(this.form)">
+                        <span class="icon is-small"><i class="mdi mdi-delete"></i></span>
                       </button>
                     </form>
-                    <a href="{% url 'campaign_send' %}?campaign={{ campaign.pk }}">Enviar</a>
+
+                    <a href="{% url 'campaign_send' %}?campaign={{ campaign.pk }}" class="button is-small is-primary" title="Enviar">
+                      <span class="icon is-small"><i class="mdi mdi-send"></i></span>
+                    </a>
+                  {% else %}
+                    <span class="tag is-success is-light" style="margin-right: 4px;">
+                      ✅ {{ campaign.success_count|default:"0" }}
+                    </span>/
+                    <span class="tag is-danger is-light">
+                      {{ campaign.error_count|default:"0" }} ❌
+                    </span>
                   {% endif %}
                 </td>
               </tr>
@@ -107,7 +118,7 @@
   <hr>
   <!-- Agregar/Editar Campaña -->
   {% if form.non_field_errors %}
-  <div class="notification is-danger">
+  <div class="notification is-danger" id="errorMessage">
       <button class="delete" onclick="this.parentElement.style.display='none';"></button>
       <ul>
       {% for error in form.non_field_errors %}
@@ -117,7 +128,7 @@
   </div>
   {% endif %}
 
-  <div class="card">
+  <div class="card" id="campaignForm">
     <header class="card-header">
       <p class="card-header-title">
         {% if editing %}
@@ -130,6 +141,9 @@
       </p>
     </header>
     <div class="card-content">
+      <div class="columns is-centered">
+        <div class="column is-three-quarters">
+
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
@@ -167,6 +181,18 @@
           <a href="{% url 'campaign_list' %}" style="margin-left: 1em;">❌ Cancelar</a>
         {% endif %}
       </form>
+      </div>
+      <div class="column is-one-quarter">
+        <div class="notification is-info">
+          <p class="title is-4">¿Cómo funciona?</p>
+          <p class="subtitle is-6">Crea campañas para enviar mensajes a grupos de contactos.</p>
+          <ul>
+            <li>Selecciona un grupo de contactos.</li>
+            <li>Revisa el contenido del mensaje.</li>
+            <li>Envía la campaña y revisa el progreso en tiempo real.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </section>

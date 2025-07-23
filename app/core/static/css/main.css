@@ -1,8 +1,16 @@
-/* input, select, textarea {
-  width: 100%;
-  padding: 0.625em;
-  border: 1px solid #dbdbdb;
-  border-radius: 4px;
-  font-size: 1em;
-  font-family: inherit;
-} */
+.has-background-grey-soft {
+  background-color: #ebebeb;
+}
+
+.box.whatsapp-preview {
+  background-color: #e1ffc7;
+  border-radius: 10px;
+  max-width: 400px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  position: relative;
+  border: solid 1px #b3da92;
+}
+
+.whatsapp-preview .whatsapp-message {
+  font-size: 0.95rem;
+}
