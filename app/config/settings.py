@@ -137,3 +137,6 @@ DOMAIN = "http://localhost:8010"
 EVOLUTION_API_KEY = os.environ.get('EVOLUTION_API_KEY', '429683C4C977415CAAFCCE10F7D57E11')
 APP_NAME = "Kavira"
 APP_SLOGAN = "Domina tus campañas de WhatsApp"
+
+# Custom settings
+TEST_MODE = True

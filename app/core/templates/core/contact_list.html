@@ -46,22 +46,12 @@
   <!-- LISTA DE CONTACTOS -->
   <div class="card has-table has-mobile-sort-spaced">
     <header class="card-header">
-      <p class="card-header-title">
+      <div class="card-header-title">
         <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
         {{ selected_group.name }}
-      </p>
+      </div>
       <div class="card-header-icon">
-        <div class="select is-small">
-          <form method="get" style="display:inline;">
-            <select name="group" onchange="this.form.submit()">
-              {% for group in groups %}
-                <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>
-                    {{ group.name }}
-                </option>
-              {% endfor %}
-            </select>
-          </form>
-        </div>
+        {% include "core/_contacts_group_selector.html" with groups=groups selected_group=selected_group select_id="groupSelector" %}
       </div>
       <!-- <a href="#" class="card-header-icon">
         <span class="icon"><i class="mdi mdi-reload"></i></span>
@@ -364,6 +354,9 @@
       }
     });
   });
+
+  // Select customers group
+  setupSelectParamUpdater("groupSelector", "group");
 </script>
 
 {% endblock %}

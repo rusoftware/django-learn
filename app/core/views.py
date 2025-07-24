@@ -35,7 +35,7 @@ def contact_list(request):
         except ContactGroup.DoesNotExist:
             selected_group = groups.first()
     else:
-        selected_group = groups.first()
+        selected_group = None #groups.first()
 
     default_group = selected_group
     form_text = ContactBulkForm()
@@ -248,7 +248,7 @@ def campaign_send(request):
         except ContactGroup.DoesNotExist:
             selected_group = groups.first()
     else:
-        selected_group = groups.first()
+        selected_group = None #groups.first()
 
     contacts = Contact.objects.filter(active=True, group=selected_group)
     instances = Instance.objects.filter(active=True)
@@ -270,6 +270,7 @@ def campaign_send(request):
         "instances": instances,
         "mimetype": mimetype,
         "mediatype": mediatype,
+        "testmode": settings.TEST_MODE,
     })
 
 # ================================
