@@ -1,0 +1,10 @@
+<div class="select is-fullwidth">
+  <select name="group" id="{{ select_id|default:"groupSelector" }}">
+    <option value="" disabled selected>Seleccionar grupo</option>
+    {% for group in groups %}
+      <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>
+        {{ group.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>

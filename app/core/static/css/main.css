@@ -14,3 +14,15 @@
 .whatsapp-preview .whatsapp-message {
   font-size: 0.95rem;
 }
+
+.scrollable-table {
+  max-height: 480px;
+  overflow-y: auto !important;
+}
+
+.scrollable-table thead th {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}

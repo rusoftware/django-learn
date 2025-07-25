@@ -1,0 +1,30 @@
+<div class="box whatsapp-preview">
+    {% if campaign.send_type == 'media' %}
+        {% if mediatype == 'image' %}
+            <figure class="image mb-2">
+            <img src="{{ campaign.media_url }}" style="border-radius: 8px;">
+            </figure>
+        {% elif mediatype == 'video' %}
+            <video controls style="max-width:100%; border-radius:4px;">
+            <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
+                Tu navegador no soporta video.
+            </video>
+        {% elif mediatype == 'audio' %}
+            <audio controls>
+            <source src="{{ campaign.media_url }}" type="{{ mimetype }}">
+                Tu navegador no soporta audio.
+            </audio>
+        {% else %}
+            <p>Archivo adjunto: <a href="{{ campaign.media_url }}">{{ campaign.media_file.name|default:"Archivo" }}</a></p>
+        {% endif %}
+    {% endif %}
+    <div class="whatsapp-message">
+        {{ campaign.message|linebreaksbr }}
+    </div>
+    <p class="has-text-grey is-size-7 has-text-right mt-2" style="margin-bottom: 0;">
+        <span id="time">12:45</span>
+        <span class="icon is-small">
+            <i class="mdi mdi-check-all has-text-primary" style="transform: scale(1.2) translateY(0.2px);"></i>
+        </span>
+    </p>
+</div>
