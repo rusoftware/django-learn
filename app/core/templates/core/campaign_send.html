@@ -91,15 +91,13 @@
             <thead>
               <tr>
                 <th>Instancia</th>
-                <th>EvoApi Name</th>
                 <th class="has-text-right">Estado</th>
               </tr>
             </thead>
             <tbody>
               {% for instance in instances %}
               <tr data-instance="{{ instance.instance_name }}">
-                <td>{{ instance.description }}</td>
-                <td>{{ instance.instance_name }}</td>
+                <td title="{{ instance.instance_name }}">{{ instance.description }}</td>
                 <td class="status-tag has-text-right">
                   <span class="tag is-info">wait...</span>
                 </td>

@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block meta_title %}{{ APP_NAME }} · {{ page_title }}{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
@@ -34,8 +35,36 @@
           Contactos
         </h1></div>
       </div>
-      <div class="level-right" style="display: none;">
-        <div class="level-item"></div>
+    </div>
+  </div>
+</section>
+
+<section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p class="subtitle">
+            <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
+            <div class="ml-2">
+            {% include "core/_contacts_group_selector.html" with groups=groups selected_group=selected_group select_id="groupSelector" %}
+            </div>
+          </p>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <div class="buttons is  right">
+            <!-- <a href="#" class="button is-primary">
+              <span class="icon"><i class="mdi mdi-plus"></i></span>
+              <span>Nuevo Contacto</span>
+            </a> -->
+            <a href="#" class="button is-primary">
+              <span class="icon"><i class="mdi mdi-plus"></i></span>
+              <span>Nuevo Grupo</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -48,10 +77,11 @@
     <header class="card-header">
       <div class="card-header-title">
         <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
-        {{ selected_group.name }}
-      </div>
-      <div class="card-header-icon">
-        {% include "core/_contacts_group_selector.html" with groups=groups selected_group=selected_group select_id="groupSelector" %}
+        {% if selected_group %}
+          Contactos del grupo: {{ selected_group.name }}
+        {% else %}
+          Selecciona un grupo para ver sus contactos
+        {% endif %}
       </div>
       <!-- <a href="#" class="card-header-icon">
         <span class="icon"><i class="mdi mdi-reload"></i></span>
@@ -77,6 +107,17 @@
             </tr>
             </thead>
             <tbody>
+            {% if not contacts %}
+            <tr>
+              <td colspan="7" class="empty-table">
+                <div>
+                  <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
+                  Selecciona un grupo para ver sus contactos
+                </div>
+              </td>
+            </tr>
+            {% endif %}
+
             {% for contact in contacts %}
             <tr>
               <td>{{ contact.name }}</td>
@@ -104,14 +145,28 @@
                 </td>
                 <td>
                 <div class="buttons is-right">
-                  <button class="button is-small is-danger jb-modal" data-target="sample-modal" type="button">
-                    <span class="icon"><i class="mdi mdi-trash-can"></i></span>
-                  </button>
+                  <form method="post" action="{% url 'contact_delete' contact.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="button" title="Borrar" class="button is-small is-danger" onclick="openModalWithForm(this.form, 'confirm-delete-modal')">
+                      <span class="icon is-small"><i class="mdi mdi-delete"></i></span>
+                    </button>
+                  </form>
                 </div>
               </td>
             </tr>
             {% endfor %}
             </tbody>
+            <tfoot>
+            <tr>
+              <th colspan="7" class="has-text-right">
+                {% if contacts %}
+                 cantidad: {{ contacts|length }}
+                {% else %}
+                 cantidad: 0
+                {% endif %}
+              </th>
+            </tr>
+            </tfoot>
           </table>
         </div>
 
@@ -154,34 +209,21 @@
   
 
   <div class="tile is-ancestor">
-    <!-- Carga de contactos CSV -->
-    <!--
-    <h2>Subir archivo CSV</h2>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form_csv %}
-          <div class="field">
-            <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            <div class="control">
-              {{ field }}
-            </div>
-            {% if field.errors %}
-              <p class="help is-danger">{{ field.errors|striptags }}</p>
-            {% endif %}
-          </div>
-        {% endfor %}
-        <button type="submit" class="button is-primary">Cargar CSV</button>
-    </form>
-    -->
     <div class="tile is-parent">
       <div class="card tile is-child">
         <header class="card-header">
           <p class="card-header-title">
             <span class="icon"><i class="mdi mdi-upload default"></i></span>
-            Importar Contactos
+            Importar Contactos en CSV al grupo&nbsp;
+            {% if not selected_group %}
+              <span class="has-text-danger">Selecciona un grupo primero</span>
+            {% else %}
+              <span class="has-text-success">{{ selected_group.name }}</span>
+            {% endif %}
           </p>
         </header>
         <div class="card-content">
+          <p class="subtitle is-5">1. Seleccioná un archivo con contactos:</p>
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {% for field in form_csv %}
@@ -194,8 +236,8 @@
                     <label class="upload control">
                       {{ form_csv.file }}
                       <a class="button is-primary">
-                        <span class="icon"><i class="mdi mdi-upload default"></i></span>
-                        <span>Elegir Archivo</span>
+                        <span class="icon"><i class="mdi mdi-magnify-scan default"></i></span>
+                        <span>Elegir archivo</span>
                       </a>
                       <span class="file-name" id="file-name">Ninguno</span>
                     </label>
@@ -206,18 +248,24 @@
                 <p class="help is-danger">{{ form_csv.file.errors|striptags }}</p>
               {% endif %}
             </div>
+            <hr>
+            <p class="subtitle is-5">2. Verifica los contactos a cargar:</p>
             <div class="field">
-              <div class="field-body">
-                <div id="csv-preview" class="box is-shadowless p-4" style="overflow-x: auto;"></div>
+              <div class="field">
+                <div id="csv-preview" class="table-container scrollable-table"></div>
               </div>
             </div>
             <hr>
+            <p class="subtitle is-5">3. Carga el archivo</p>
             <div class="field is-horizontal">
               <div class="field-label is-normal"></div>
               <div class="field-body">
                 <div class="field">
                   <div class="control">
-                    <button type="submit" class="button is-primary">Cargar CSV</button>
+                    <button type="submit" class="button is-primary" id="uploadBtn" disabled>
+                      <i class="mdi mdi-upload"></i>
+                      <span class="ml-2">Cargar CSV</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -229,24 +277,6 @@
     </div>
 
     <!-- Carga Contactos Texto -->
-    <!--
-    <h2>Cargar contactos manualmente</h2>
-    <form method="post">
-        {% csrf_token %}
-        {% for field in form_text %}
-          <div class="field">
-            <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            <div class="control">
-              {{ field }}
-            </div>
-            {% if field.errors %}
-              <p class="help is-danger">{{ field.errors|striptags }}</p>
-            {% endif %}
-          </div>
-        {% endfor %}
-        <button type="submit" class="button is-primary">Cargar texto</button>
-    </form>
-    -->
     <div class="tile is-parent">
       <div class="card tile is-child">
         <header class="card-header">
@@ -287,6 +317,11 @@
     </div>
   </div>
 </section>
+
+<!-- Modal de confirmación para borrar contacto -->
+{% include "core/_confirm_modal.html" with modal_id="confirm-delete-modal" title="¿Confirmar borrado?" body="¿Seguro que querés borrar este contacto?" confirm_text="Sí, borrar" %}
+<!---->
+
 {% endblock %}
 
 {% block extra_scripts %}
@@ -294,6 +329,8 @@
   const input = document.querySelector('input[type="file"]');
   const fileName = document.getElementById('file-name');
   const preview = document.getElementById('csv-preview');
+  const uploadBtn = document.getElementById('uploadBtn');
+  uploadBtn.disabled = true;
 
   input.addEventListener('change', () => {
     const file = input.files[0];
@@ -301,13 +338,14 @@
     preview.innerHTML = '';
 
     if (file && file.type === 'text/csv') {
+      uploadBtn.disabled = false;
       const reader = new FileReader();
       reader.onload = function(e) {
-        const lines = e.target.result.split('\n').slice(0, 5); // solo 5 primeras
+        const lines = e.target.result.split('\n').filter(Boolean);
         const table = document.createElement('table');
-        table.className = 'table is-striped is-hoverable is-fullwidth';
-        const headerRow = document.createElement('tr');
-        headerRow.innerHTML = '<th>Nombre</th><th>Teléfono</th><th>Activo</th><th>Texto 1</th><th>Texto 2</th><th>Texto 3</th>';
+        table.className = 'table is-striped is-hoverable is-fullwidth scrollable-table csv-preview-table';
+        const headerRow = document.createElement('thead');
+        headerRow.innerHTML = '<tr><th>Nombre</th><th>Teléfono</th><th>Activo</th><th>Texto 1</th><th>Texto 2</th><th>Texto 3</th></tr>';
         table.appendChild(headerRow);
 
         lines.forEach((line, index) => {
@@ -358,5 +396,30 @@
   // Select customers group
   setupSelectParamUpdater("groupSelector", "group");
 </script>
+{% endblock %}
 
+{% block extra_styles %}
+<style>
+td.empty-table {
+  background-color: #fff;
+  border: 1px solid #f9f9f9;
+  border-radius: 4px;
+}
+td.empty-table:hover {
+  background-color: #fff;
+}
+.empty-table div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 260px;
+  color: #CCC;
+  font-size: 1.2em;
+  text-align: center;
+}
+#csv-preview {
+  max-height: 300px;
+  overflow-y: auto;
+}
+</style>
 {% endblock %}

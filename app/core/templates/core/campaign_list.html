@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block meta_title %}{{ APP_NAME }} · 📢 Campañas{% endblock %}
 {% block meta_description %}Probador de envíos de mensajes para herramientas internas.{% endblock %}
@@ -81,7 +82,7 @@
 
                     <form method="post" action="{% url 'campaign_delete' campaign.pk %}" style="display: inline;">
                       {% csrf_token %}
-                      <button type="button" title="Borrar" class="button is-small is-danger" onclick="openDeleteModal(this.form)">
+                      <button type="button" title="Borrar" class="button is-small is-danger" onclick="openModalWithForm(this.form, 'confirm-delete-modal')">
                         <span class="icon is-small"><i class="mdi mdi-delete"></i></span>
                       </button>
                     </form>
@@ -139,6 +140,9 @@
           Nueva Campaña de Whatsapp
         {% endif %}
       </p>
+      <p class="card-header-icon">
+        <img src="https://static.whatsapp.net/rsrc.php/yZ/r/JvsnINJ2CZv.svg" alt="WhatsApp" style="height: 22px;">
+      </p>
     </header>
     <div class="card-content">
       <div class="columns is-centered">
@@ -183,7 +187,7 @@
       </form>
       </div>
       <div class="column is-one-quarter">
-        <div class="notification is-info">
+        <!-- <div class="notification is-info">
           <p class="title is-4">¿Cómo funciona?</p>
           <p class="subtitle is-6">Crea campañas para enviar mensajes a grupos de contactos.</p>
           <ul>
@@ -191,6 +195,9 @@
             <li>Revisa el contenido del mensaje.</li>
             <li>Envía la campaña y revisa el progreso en tiempo real.</li>
           </ul>
+        </div> -->
+        <div id="campaignPreview">
+          {% include "core/_whatsapp_preview.html" with campaign=campaign_editing mediatype=campaign_editing.mediatype mimetype=campaign_editing.mimetype %}
         </div>
       </div>
     </div>
@@ -198,23 +205,7 @@
 </section>
 
 <!-- MODAL -->
-<!-- TODO: hacer el modal reutilizable -->
-<div id="confirm-delete-modal" class="modal">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">¿Confirmar borrado?</p>
-      <button class="delete" aria-label="close" onclick="closeModal()"></button>
-    </header>
-    <section class="modal-card-body">
-      ¿Seguro que querés borrar esta campaña?
-    </section>
-    <footer class="modal-card-foot">
-      <button class="button is-danger" id="confirm-delete-btn">Sí, borrar</button>
-      <button class="button" onclick="closeModal()">Cancelar</button>
-    </footer>
-  </div>
-</div>
+ {% include "core/_confirm_modal.html" with modal_id="confirm-delete-modal" title="¿Confirmar borrado?" body="¿Seguro que querés borrar esta campaña?" confirm_text="Sí, borrar" %}
 <!-- END MODAL-->
 
 {% endblock %}
@@ -244,28 +235,89 @@
     toggleMediaFields(); // Initial call to set the state
   });
 
-  // Close modal when clicking outside or on the close button
-  document.querySelectorAll('.modal-background, .modal-close, .jb-modal-close').forEach(el => {
-    el.addEventListener('click', function() {
-      this.closest('.modal').classList.remove('is-active');
-    });
-  });
+  
+  // Update campaign preview on form changes
+  const mediaInput = document.getElementById('id_media_url');
+  const msgInput = document.getElementById('id_message');
+  const filenameInput = document.getElementById('id_filename');
+  const campaignPreview = document.getElementById('campaignPreview');
+  const msgCampaignPreview = campaignPreview.querySelector('.whatsapp-message');
+  const mediaContainer = campaignPreview.querySelector('#mediaContainer');
 
-  // Delete Campaign Modal functionality
-  let deleteFormToSubmit = null;
+  function getMediaType(url) {
+    const cleanUrl = url.split('?')[0].split('#')[0];
+    const extension = cleanUrl.split('.').pop().toLowerCase();
 
-  function openDeleteModal(form) {
-    deleteFormToSubmit = form;
-    document.getElementById('confirm-delete-modal').classList.add('is-active');
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) return 'image';
+    if (['mp4', 'webm', 'ogg'].includes(extension)) return 'video';
+    if (['mp3', 'wav', 'ogg'].includes(extension)) return 'audio';
+
+    // No es media directo, se deja como link enriquecido
+    return null;
   }
 
-  function closeModal() {
-    document.getElementById('confirm-delete-modal').classList.remove('is-active');
-    deleteFormToSubmit = null;
+  function updateFileNamePreview() {
+    const link = document.getElementById('documentPreview');
+    link.textContent = filenameInput.value.trim() || 'Archivo adjunto';
   }
 
-  document.getElementById('confirm-delete-btn').addEventListener('click', function () {
-    if (deleteFormToSubmit) deleteFormToSubmit.submit();
-  });
+  function updateMsgPreview() {
+    const msg = msgInput.value.trim();
+    msgCampaignPreview.innerHTML = msg.replace(/\n/g, '<br>');
+  }
+
+  function updateMediaPreview() {
+    const url = mediaInput.value.trim();
+    const filename = filenameInput.value.trim() || 'Archivo adjunto';
+
+    // Limpiar media anterior
+    mediaContainer.innerHTML = '';
+    updateMsgPreview();
+
+    if (!url) return;
+
+    const type = getMediaType(url);
+    let mediaElement;
+
+    if (type === 'image') {
+      mediaElement = document.createElement('figure');
+      mediaElement.className = 'image mb-2';
+      const img = document.createElement('img');
+      img.id = 'mediaPreview';
+      img.src = url;
+      img.style.borderRadius = '8px';
+      mediaElement.appendChild(img);
+    } else if (type === 'video') {
+      mediaElement = document.createElement('video');
+      mediaElement.style.borderRadius = '4px';
+      mediaElement.style.maxWidth = '100%';
+      mediaElement.controls = true;
+      const source = document.createElement('source');
+      source.src = url;
+      source.type = 'video/mp4';
+      mediaElement.appendChild(source);
+    } else if (type === 'audio') {
+      mediaElement = document.createElement('audio');
+      mediaElement.controls = true;
+      const source = document.createElement('source');
+      source.src = url;
+      source.type = 'audio/mpeg';
+      mediaElement.appendChild(source);
+    } else {
+      mediaElement = document.createElement('p');
+      const link = document.createElement('a');
+      link.id = 'documentPreview';
+      link.href = mediaInput.value.trim();
+      link.textContent = filename || 'Archivo adjunto';
+      mediaElement.appendChild(link);
+    }
+
+    mediaContainer.appendChild(mediaElement);
+  }
+
+  mediaInput.addEventListener('input', updateMediaPreview);
+  filenameInput.addEventListener('input', updateFileNamePreview);
+  msgInput.addEventListener('input', updateMsgPreview);
+
 </script>
 {% endblock %}

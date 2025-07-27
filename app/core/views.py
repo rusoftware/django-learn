@@ -132,6 +132,14 @@ def toggle_contact_active(request, pk):
     contact.save()
     return JsonResponse({'active': contact.active})
 
+@require_http_methods(["POST"])
+def contact_delete(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    # if contact.active:
+    #     return JsonResponse({"error": "No se puede eliminar un contacto activo."}, status=400)
+    
+    contact.delete()
+    return redirect('contact_list')
 
 # ================================
 # Listado de instancias
@@ -196,6 +204,8 @@ def campaign_list(request, pk=None):
         instance = get_object_or_404(MessageCampaign, pk=pk)
         if instance.status not in (MessageCampaign.STATUS_UNSENT, MessageCampaign.STATUS_ERROR):
             return redirect("campaign_list")
+        if instance.send_type == 'media':
+            instance.mimetype, instance.mediatype = get_mimetype_and_mediatype(instance.media_file.name if instance.media_file else instance.media_url)
     else:
         instance = None
 

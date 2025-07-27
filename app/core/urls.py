@@ -16,6 +16,7 @@ urlpatterns = [
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
     path('check-instance-status/<str:instance_name>/', views.check_instance_status, name='check_instance_status'),
     path('contacts/<int:pk>/toggle/', views.toggle_contact_active, name='toggle_contact'),
+    path("contacts/<int:pk>/delete/", views.contact_delete, name="contact_delete"),
     # test endpoints and view
     path("test-tools/", views.test_tools_view, name="test_tools"),
     path('test-send-text/', views.test_send_text, name='test_send_text'),
