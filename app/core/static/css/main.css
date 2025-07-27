@@ -2,6 +2,10 @@
   background-color: #ebebeb;
 }
 
+.has-text-grey-soft {
+  color: #ccc;
+}
+
 .box.whatsapp-preview {
   background-color: #e1ffc7;
   border-radius: 10px;

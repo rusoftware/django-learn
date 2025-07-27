@@ -1,4 +1,5 @@
 <div class="box whatsapp-preview">
+    <span id="mediaContainer">
     {% if campaign.send_type == 'media' %}
         {% if mediatype == 'image' %}
             <figure class="image mb-2">
@@ -15,11 +16,18 @@
                 Tu navegador no soporta audio.
             </audio>
         {% else %}
-            <p>Archivo adjunto: <a href="{{ campaign.media_url }}">{{ campaign.media_file.name|default:"Archivo" }}</a></p>
+            <p><a href="{{ campaign.media_url }}" id="documentPreview">
+                {{ campaign.filename|default:"Archivo" }}
+            </a></p>
         {% endif %}
     {% endif %}
+    </span>
     <div class="whatsapp-message">
+        {% if not campaign.message %}
+            <span class="has-text-grey-soft">previsualiza tu mensaje antes de enviarlo</span>
+        {% else %}
         {{ campaign.message|linebreaksbr }}
+        {% endif %}
     </div>
     <p class="has-text-grey is-size-7 has-text-right mt-2" style="margin-bottom: 0;">
         <span id="time">12:45</span>

@@ -1,0 +1,18 @@
+<div id="{{ modal_id|default:'confirm-modal' }}" class="modal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">{{ title|default:"¿Confirmar?" }}</p>
+      <button class="delete" aria-label="close" onclick="closeModal('{{ modal_id|default:'confirm-modal' }}')"></button>
+    </header>
+    <section class="modal-card-body">
+      {{ body|default:"¿Estás seguro?" }}
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-danger" onclick="submitModalForm('{{ modal_id|default:'confirm-modal' }}')">
+        {{ confirm_text|default:"Sí, confirmar" }}
+      </button>
+      <button class="button" onclick="closeModal('{{ modal_id|default:'confirm-modal' }}')">Cancelar</button>
+    </footer>
+  </div>
+</div>
