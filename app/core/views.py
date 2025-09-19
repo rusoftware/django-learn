@@ -385,7 +385,7 @@ def test_tools_view(request):
 
 def test_send_text(request):
     try:
-        instance = Instance.objects.get(instance_name="fdt") # Instance.objects.first()
+        instance = Instance.objects.get(instance_name="WA2") # Instance.objects.first()
         contact = Contact.objects.filter(active=True).first()
 
         if not instance or not contact:
@@ -407,7 +407,7 @@ def test_send_text(request):
 # Test endpoint for sending media
 def test_send_media(request):
     try:
-        instance = Instance.objects.get(instance_name="fdt")
+        instance = Instance.objects.get(instance_name="WA2")
         contact = Contact.objects.filter(active=True).first()
         
         if not instance or not contact:
