@@ -14,7 +14,9 @@ services:
 
   web:
     build: .
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn app.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - ./app:/code
     ports:
@@ -26,6 +28,10 @@ services:
       - DB_USER=django_user
       - DB_PASSWORD=django_pass
       - DB_HOST=db
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=django_db
+      - MYSQL_USER=django_user
+      - MYSQL_PASSWORD=django_pass
 
 volumes:
   mariadb_data:
