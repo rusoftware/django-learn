@@ -3,7 +3,7 @@ __pycache__/
 *.sqlite3
 *.log
 *.DS_Store
-.env
+.env.*
 venv/
 env/
 mariadb_data/
