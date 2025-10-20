@@ -2,3 +2,4 @@ django
 mysqlclient
 requests
 Pillow
+django-environ
