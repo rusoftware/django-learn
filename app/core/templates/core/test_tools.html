@@ -38,6 +38,31 @@
       </p>
     </header>
     <div class="card-content">
+      <div class="field">
+        <label class="label">Seleccionar instancia:</label>
+        <div class="control">
+          <div class="select">
+            <select id="instance-select">
+              {% for inst in instances %}
+                <option value="{{ inst.instance_name }}">{{ inst.instance_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Seleccionar contacto:</label>
+        <div class="control">
+          <div class="select">
+            <select id="contact-select">
+              {% for contact in contacts %}
+                <option value="{{ contact.id }}">{{ contact.name }} ({{ contact.phone }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
       <button class="button is-primary" onclick="sendTest('text')">Enviar mensaje de texto</button>
       <button class="button is-primary" onclick="sendTest('media')">Enviar mensaje con media</button>
       <hr>
@@ -53,20 +78,24 @@
 {% block extra_scripts %}
 <script>
 function sendTest(type) {
+    const instance = document.getElementById('instance-select').value;
+    const contact = document.getElementById('contact-select').value;  
     const url = type === 'text' ? "{% url 'test_send_text' %}" : "{% url 'test_send_media' %}";
     const output = document.getElementById('test-result');
 
     output.textContent = "Enviando...";
 
-    fetch(url)
-        .then(response => {
+    fetch(url + `?instance=${encodeURIComponent(instance)}&contact_id=${encodeURIComponent(contact)}`)
+        .then(async response => {
             if (!response.ok) {
-                return response.text().then(text => { throw new Error(text); });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "Error desconocido");
+                return data;
             }
             return response.json();
         })
         .then(data => {
-            output.textContent = JSON.stringify(data, null, 2);
+        output.textContent = JSON.stringify(data, null, 2);
         })
         .catch(err => {
             output.textContent = "Error:\n" + err.message;

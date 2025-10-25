@@ -172,7 +172,7 @@ def toggle_instance_active(request, pk):
 
 def check_instance_status(request, instance_name):
     try:
-        url = f"https://prueba2-evolution-api.jbdb3h.easypanel.host/instance/connectionState/{instance_name}"
+        url = f"{settings.EVOLUTION_API_KEY_URL}/instance/connectionState/{instance_name}"
         headers = {"apikey": settings.EVOLUTION_API_KEY}
         response = requests.get(url, headers=headers)
         return JsonResponse(response.json())
@@ -379,14 +379,22 @@ def send_messages_view(request):
 # ================================
 # Test endpoint for sending text messages
 def test_tools_view(request):
+    instances = Instance.objects.filter(active=True)
+    contacts = Contact.objects.filter(active=True)
+
     return render(request, "core/test_tools.html", {
-        "current_page": "test_tools"
+        "current_page": "test_tools",
+        "instances": instances,
+        "contacts": contacts
     })
 
 def test_send_text(request):
     try:
-        instance = Instance.objects.get(instance_name="WA2") # Instance.objects.first()
-        contact = Contact.objects.filter(active=True).first()
+        instance_name = request.GET.get("instance") or "WA2"
+        instance = Instance.objects.filter(instance_name=instance_name).first()
+
+        contact_id = request.GET.get("contact_id")
+        contact = Contact.objects.filter(id=contact_id).first()
 
         if not instance or not contact:
             return HttpResponse("Faltan instancia o contacto activo.")
@@ -402,13 +410,16 @@ def test_send_text(request):
         })
 
     except Exception as e:
-        return HttpResponse(f"Error: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 # Test endpoint for sending media
 def test_send_media(request):
     try:
-        instance = Instance.objects.get(instance_name="WA2")
-        contact = Contact.objects.filter(active=True).first()
+        instance_name = request.GET.get("instance") or "WA2"
+        instance = Instance.objects.filter(instance_name=instance_name).first()
+
+        contact_id = request.GET.get("contact_id")
+        contact = Contact.objects.filter(id=contact_id).first()
         
         if not instance or not contact:
             return HttpResponse("Falta instancia activa o contacto activo.")
@@ -430,4 +441,4 @@ def test_send_media(request):
             "result": result
         })
     except Exception as e:
-        return HttpResponse(f"Error: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
