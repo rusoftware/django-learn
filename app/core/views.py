@@ -171,11 +171,11 @@ def toggle_instance_active(request, pk):
     return JsonResponse({'active': instance.active})
 
 def check_instance_status(request, instance_name):
+    instance = get_object_or_404(Instance, instance_name=instance_name)
+    
     try:
         apikey = settings.EVOLUTION_API_KEY
-        url = f"{settings.EVOLUTION_API_URL}/instance/connectionState/{instance_name}"
-        print("URL:", url)
-        print("API KEY:", apikey)
+        url = f"{instance.api_url}/instance/connectionState/{instance_name}"
         headers = {"apikey": apikey}
         response = requests.get(url, headers=headers, timeout=10)
         return JsonResponse(response.json())
