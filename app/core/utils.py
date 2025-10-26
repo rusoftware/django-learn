@@ -86,9 +86,10 @@ def build_message(contact, template):
 
 # Función para enviar mensajes de texto a través de la API de WhatsApp
 def send_whatsapp_message(instance, contact, message_text):
+    phone_number = contact.phone.lstrip("+")
     url = f"{instance.api_url.rstrip('/')}/message/sendText/{instance.instance_name}"
     payload = {
-        "number": contact.phone,
+        "number": phone_number,
         "text": message_text
     }
     headers = {
@@ -110,6 +111,7 @@ def send_whatsapp_message(instance, contact, message_text):
 
 # Función para enviar archivos multimedia a través de la API de WhatsApp
 def send_whatsapp_media(instance, contact, *, mediatype, mimetype, media_url, caption, filename):
+    phone_number = contact.phone.lstrip("+")
     url = f"{instance.api_url}/message/sendMedia/{instance.instance_name}"
 
     headers = {
@@ -118,7 +120,7 @@ def send_whatsapp_media(instance, contact, *, mediatype, mimetype, media_url, ca
     }
 
     payload = {
-        "number": contact.phone,
+        "number": phone_number,
         "mediatype": mediatype,
         "mimetype": mimetype,
         "caption": caption,
