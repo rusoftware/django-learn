@@ -165,6 +165,7 @@ def instances_list(request, pk=None):
 
     if request.method == 'POST':
         form = InstanceForm(request.POST, instance=instance)
+        
         if form.is_valid():
             form.save()
             return redirect('instances_list')
@@ -351,6 +352,13 @@ def send_messages_view(request):
             try:
                 if campaign.send_type == 'media':
                     media_url = campaign.media_url
+
+                    if settings.CLOUDFLARE_WORKER_FOR_MEDIA:
+                        media_url = campaign.media_file.url.replace(
+                            settings.DOMAIN,
+                            settings.CLOUDFLARE_WORKER_FOR_MEDIA
+                        )
+
                     mediafile = campaign.media_file.name if campaign.media_file else media_url
                     mimetype, mediatype = get_mimetype_and_mediatype(mediafile)
 

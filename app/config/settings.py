@@ -95,6 +95,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+CLOUDFLARE_WORKER_FOR_MEDIA = env.str('CLOUDFLARE_WORKER_FOR_MEDIA', default='')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
