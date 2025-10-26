@@ -190,6 +190,12 @@ def check_instance_status(request, instance_name):
     except requests.RequestException as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+@require_http_methods(["POST"])
+def instance_delete(request, pk):
+    instance = get_object_or_404(Instance, pk=pk)
+    instance.delete()
+    return redirect('instances_list')
+
 # ================================
 # Listado de campañas
 # ================================

@@ -15,6 +15,7 @@ urlpatterns = [
     path('campaigns/send/', views.campaign_send, name='campaign_send'),
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
     path('check-instance-status/<str:instance_name>/', views.check_instance_status, name='check_instance_status'),
+    path('instances/delete/<int:pk>/', views.instance_delete, name='instance_delete'),
     path('contacts/<int:pk>/toggle/', views.toggle_contact_active, name='toggle_contact'),
     path("contacts/<int:pk>/delete/", views.contact_delete, name="contact_delete"),
     path('contacts/group/create/', views.contact_group_create, name='contact_group_create'),

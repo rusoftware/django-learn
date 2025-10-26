@@ -14,16 +14,6 @@
         </ul>
       </div>
     </div>
-    <!-- <div class="level-right">
-      <div class="level-item">
-        <div class="buttons is-right">
-          <a href="#" target="_blank" class="button is-primary">
-            <span class="icon"><i class="mdi mdi-github-circle"></i></span>
-            <span>GitHub</span>
-          </a>
-        </div>
-      </div>
-    </div> -->
   </div>
 </section>
 <section class="hero is-hero-bar">
@@ -65,12 +55,14 @@
                 <th>API URL</th>
                 <th>API Key</th>
                 <th>Instance Name</th>
+                <th>Activa</th>
                 <th>Status</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
             {% for instance in instances %}
-              <tr>
+              <tr data-instance="{{ instance.instance_name }}">
                 <td>{{ instance.description }}</td>
                 <td>{{ instance.api_url }}</td>
                 <td>{{ instance.api_key }}</td>
@@ -90,6 +82,23 @@
                       </div>
                     </div>
                   </form>
+                </td>
+                <td class="status-tag">
+                  <span class="tag is-info">wait...</span>
+                </td>
+                <td>
+                  <div class="buttons is-right">
+                    <form method="post" action="{% url 'instance_delete' instance.pk %}" style="display: inline;">
+                      {% csrf_token %}
+                      <button 
+                        type="button" 
+                        title="Borrar" 
+                        class="button is-small is-danger" 
+                        onclick="openModalWithForm(this.form, 'confirm-delete-instance')">
+                        <span class="icon is-small"><i class="mdi mdi-delete"></i></span>
+                      </button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             {% endfor %}
@@ -157,6 +166,9 @@
     </div>
   </div>
 </section>
+
+{% include "core/_confirm_modal.html" with modal_id="confirm-delete-instance" title="¿Confirmar borrado?" body="¿Seguro que querés borrar esta instancia?" confirm_text="Sí, borrar" %}
+
 {% endblock %}
 
 {% block extra_scripts %}

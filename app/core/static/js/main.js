@@ -43,6 +43,40 @@ document.addEventListener('click', function (e) {
 });
 
 
+/**
+ * instance_status_checker.js
+ * Recorre los elementos con data-instance y actualiza su estado vía /check-instance-status/<instanceName>/
+ * Espera que cada fila tenga dentro un elemento con clase .status-tag donde mostrará el resultado.
+ */
+document.addEventListener("DOMContentLoaded", () => {
+  const rows = document.querySelectorAll("[data-instance]");
+  if (!rows.length) return;
 
-// Ejemplo de uso:
-// setupSelectParamUpdater("groupSelector", "group");
+  rows.forEach(row => {
+    const instanceName = row.dataset.instance;
+    const statusCell = row.querySelector(".status-tag");
+
+    if (!instanceName || !statusCell) return;
+
+    fetch(`/check-instance-status/${instanceName}/`)
+      .then(res => res.json())
+      .then(data => {
+        const state = data?.instance?.state || "unknown";
+        let html;
+        switch (state) {
+          case "open":
+            html = `<span class="tag is-success">Working</span>`;
+            break;
+          case "close":
+            html = `<span class="tag is-danger">Failed</span>`;
+            break;
+          default:
+            html = `<span class="tag is-warning">${state}</span>`;
+        }
+        statusCell.innerHTML = html;
+      })
+      .catch(() => {
+        if (statusCell) statusCell.innerHTML = `<span class="tag is-warning">error</span>`;
+      });
+  });
+});
