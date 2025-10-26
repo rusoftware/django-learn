@@ -25,13 +25,6 @@ services:
     - .env.local
     ports:
       - "8010:8000"                 # host 8010 -> container 8000
-    environment:
-      - DB_NAME=django_db
-      - DB_USER=django_user
-      - DB_PASSWORD=django_pass
-      - DB_HOST=db
-      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY:-}
-      - DOMAIN=${DOMAIN:-http://localhost:8010}
 
 volumes:
   mariadb_data:

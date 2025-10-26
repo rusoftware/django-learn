@@ -172,9 +172,12 @@ def toggle_instance_active(request, pk):
 
 def check_instance_status(request, instance_name):
     try:
-        url = f"{settings.EVOLUTION_API_KEY_URL}/instance/connectionState/{instance_name}"
-        headers = {"apikey": settings.EVOLUTION_API_KEY}
-        response = requests.get(url, headers=headers)
+        apikey = settings.EVOLUTION_API_KEY
+        url = f"{settings.EVOLUTION_API_URL}/instance/connectionState/{instance_name}"
+        print("URL:", url)
+        print("API KEY:", apikey)
+        headers = {"apikey": apikey}
+        response = requests.get(url, headers=headers, timeout=10)
         return JsonResponse(response.json())
     except requests.RequestException as e:
         return JsonResponse({"error": str(e)}, status=500)
