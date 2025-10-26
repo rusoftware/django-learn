@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db.models import Count, Q
 from time import sleep
 from .models import Contact, ContactGroup, Instance, MessageHistory, MessageCampaign
-from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageCampaignForm
+from .forms import ContactForm, ContactBulkForm, ContactCSVForm, InstanceForm, MessageCampaignForm, ContactGroupForm
 from .utils import send_whatsapp_message, send_whatsapp_media, build_message, get_mimetype_and_mediatype, get_filename_from_campaign, get_int_param
 import csv
 import json
@@ -35,7 +35,7 @@ def contact_list(request):
         except ContactGroup.DoesNotExist:
             selected_group = groups.first()
     else:
-        selected_group = None #groups.first()
+        selected_group = groups.first()
 
     default_group = selected_group
     form_text = ContactBulkForm()
@@ -139,6 +139,14 @@ def contact_delete(request, pk):
     #     return JsonResponse({"error": "No se puede eliminar un contacto activo."}, status=400)
     
     contact.delete()
+    return redirect('contact_list')
+
+@require_http_methods(["POST"])
+def contact_group_create(request):
+    form = ContactGroupForm(request.POST)
+    if form.is_valid():
+        group = form.save()
+        return redirect(f"{reverse('contact_list')}?group={group.id}")
     return redirect('contact_list')
 
 # ================================

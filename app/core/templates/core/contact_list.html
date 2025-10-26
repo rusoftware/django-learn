@@ -59,7 +59,7 @@
               <span class="icon"><i class="mdi mdi-plus"></i></span>
               <span>Nuevo Contacto</span>
             </a> -->
-            <a href="#" class="button is-primary">
+            <a href="#" class="button is-primary" onclick="openModalWithForm(null, 'new-group-modal')">
               <span class="icon"><i class="mdi mdi-plus"></i></span>
               <span>Nuevo Grupo</span>
             </a>
@@ -320,6 +320,7 @@
 
 <!-- Modal de confirmación para borrar contacto -->
 {% include "core/_confirm_modal.html" with modal_id="confirm-delete-modal" title="¿Confirmar borrado?" body="¿Seguro que querés borrar este contacto?" confirm_text="Sí, borrar" %}
+{% include "core/_new_group_modal.html" %}
 <!---->
 
 {% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
 from django.core.validators import RegexValidator
-from .models import Contact, Instance, MessageCampaign
+from .models import Contact, Instance, MessageCampaign, ContactGroup
 
 class ContactForm(forms.ModelForm):
     phone = forms.CharField(
@@ -22,6 +22,14 @@ class ContactBulkForm(forms.Form):
         }),
         label="Crear Contactos"
     )
+
+class ContactGroupForm(forms.ModelForm):
+    class Meta:
+        model = ContactGroup
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'input', 'placeholder': 'Nombre del grupo'}),
+        }
 
 class ContactCSVForm(forms.Form):
     file = forms.FileField(label="Cargar CSV")

@@ -9,9 +9,17 @@
 </ul>
 <p class="menu-label">Gestión</p>
 <ul class="menu-list">
+  <!--
   <li>
     <a href="{% url 'contact_list' %}" class="{% if current_page == 'contact_list' %}is-active{% endif %} has-icon">
       <span class="icon has-update-mark"><i class="mdi mdi-account-multiple-outline"></i></span>
+      <span class="menu-item-label">Contactos</span>
+    </a>
+  </li>
+  -->
+  <li>
+    <a href="{% url 'contact_list' %}" class="{% if current_page == 'contact_list' %}is-active{% endif %} has-icon">
+      <span class="icon"><i class="mdi mdi-account-multiple-outline"></i></span>
       <span class="menu-item-label">Contactos</span>
     </a>
   </li>

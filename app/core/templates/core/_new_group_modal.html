@@ -1,0 +1,26 @@
+<div id="new-group-modal" class="modal">
+  <div class="modal-background" onclick="closeModal('new-group-modal')"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Crear nuevo grupo</p>
+      <button class="delete" aria-label="close" onclick="closeModal('new-group-modal')"></button>
+    </header>
+
+    <form method="post" action="{% url 'contact_group_create' %}">
+      {% csrf_token %}
+      <section class="modal-card-body">
+        <div class="field">
+          <label class="label">Nombre del grupo</label>
+          <div class="control">
+            <input type="text" name="name" class="input" placeholder="Ej: Clientes 2025" required>
+          </div>
+        </div>
+      </section>
+
+      <footer class="modal-card-foot">
+        <button type="submit" class="button is-primary">Crear</button>
+        <button type="button" class="button" onclick="closeModal('new-group-modal')">Cancelar</button>
+      </footer>
+    </form>
+  </div>
+</div>

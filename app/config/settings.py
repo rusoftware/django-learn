@@ -100,7 +100,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuración custom
 DOMAIN = env('DOMAIN', default='http://localhost:8010')
-EVOLUTION_API_URL = env('EVOLUTION_API_URL', default='https://prueba2-evolution-api.jbdb3h.easypanel.host')
 EVOLUTION_API_KEY=env('EVOLUTION_API_KEY')
 APP_NAME = "TMK"
 APP_SLOGAN = "Domina tus campañas de WhatsApp"
