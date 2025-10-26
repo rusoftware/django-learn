@@ -88,6 +88,9 @@
                 </td>
                 <td>
                   <div class="buttons is-right">
+                    <a href="{% url 'instances_edit' instance.pk %}#instanceForm" class="button is-small is-info" title="Editar">
+                      <span class="icon is-small"><i class="mdi mdi-pencil"></i></span>
+                    </a>
                     <form method="post" action="{% url 'instance_delete' instance.pk %}" style="display: inline;">
                       {% csrf_token %}
                       <button 
@@ -114,8 +117,13 @@
   <div class="card">
     <header class="card-header">
       <p class="card-header-title">
-        <span class="icon"><i class="mdi mdi-plus"></i></span>
-        Agregar Instancia
+        {% if editing %}
+          <span class="icon"><i class="mdi mdi-pencil-outline"></i></span>
+          Editando Instancia: {{ instance_editing.instance_name }}
+        {% else %}
+          <span class="icon"><i class="mdi mdi-plus"></i></span>
+          Agregar Instancia
+        {% endif %}
       </p>
     </header>
     <div class="card-content">
@@ -159,9 +167,12 @@
 
         <div class="field">
           <div class="control">
-            <button type="submit" class="button is-primary">Guardar</button>
+            <button type="submit" class="button is-primary">{% if editing %}Guardar cambios{% else %}Agregar{% endif %}</button>
           </div>
         </div>
+        {% if editing %}
+          <a href="{% url 'instances_list' %}" style="margin-left: 1em;">❌ Cancelar</a>
+        {% endif %}
       </form>
     </div>
   </div>

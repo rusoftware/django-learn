@@ -152,20 +152,31 @@ def contact_group_create(request):
 # ================================
 # Listado de instancias
 # ================================
-def instances_list(request):
+def instances_list(request, pk=None):
     instances = Instance.objects.all()
-    form = InstanceForm()
+
+    if pk:
+        instance = get_object_or_404(Instance, pk=pk)
+    else:
+        instance = None
+
+
+    # form = InstanceForm()
 
     if request.method == 'POST':
-        form = InstanceForm(request.POST)
+        form = InstanceForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
             return redirect('instances_list')
+    else:
+        form = InstanceForm(instance=instance)
 
     return render(request, 'core/instances_list.html', {
         'current_page': 'instances_list',
         'instances': instances,
-        'form': form
+        'form': form,
+        'editing': instance is not None,
+        'instance_editing': instance,
     })
 
 # ================================

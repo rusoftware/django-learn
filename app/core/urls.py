@@ -13,6 +13,7 @@ urlpatterns = [
     path("campaigns/<int:pk>/", views.campaign_list, name="campaign_edit"),
     path("campaigns/<int:pk>/delete/", views.campaign_delete, name="campaign_delete"),
     path('campaigns/send/', views.campaign_send, name='campaign_send'),
+    path('instances/<int:pk>/', views.instances_list, name='instances_edit'),
     path('instances/<int:pk>/toggle/', views.toggle_instance_active, name='toggle_instance'),
     path('check-instance-status/<str:instance_name>/', views.check_instance_status, name='check_instance_status'),
     path('instances/delete/<int:pk>/', views.instance_delete, name='instance_delete'),
