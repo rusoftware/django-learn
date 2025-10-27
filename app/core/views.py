@@ -351,6 +351,9 @@ def send_messages_view(request):
 
             try:
                 if campaign.send_type == 'media':
+                    if not campaign.media_file:
+                        raise ValueError("No hay archivo de media en la campaña")
+                    
                     media_url = campaign.media_url
 
                     if settings.CLOUDFLARE_WORKER_FOR_MEDIA:
@@ -359,8 +362,7 @@ def send_messages_view(request):
                             settings.CLOUDFLARE_WORKER_FOR_MEDIA
                         )
 
-                    mediafile = campaign.media_file.name if campaign.media_file else media_url
-                    mimetype, mediatype = get_mimetype_and_mediatype(mediafile)
+                    mimetype, mediatype = get_mimetype_and_mediatype(media_url)
 
                     full_status = send_whatsapp_media(
                         instance=instance,
