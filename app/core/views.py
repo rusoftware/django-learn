@@ -351,19 +351,15 @@ def send_messages_view(request):
 
             try:
                 if campaign.send_type == 'media':
-                   
                     media_url = campaign.media_url
-                    print("Original media_url:", media_url)
 
-                    if True: #settings.CLOUDFLARE_WORKER_FOR_MEDIA:
+                    if settings.CLOUDFLARE_WORKER_FOR_MEDIA:
                         media_url = campaign.media_file.url.replace(
                             settings.DOMAIN,
                             settings.CLOUDFLARE_WORKER_FOR_MEDIA
                         )
 
                     mimetype, mediatype = get_mimetype_and_mediatype(media_url)
-                    print("Transformed media_url:", media_url)
-                    return
 
                     full_status = send_whatsapp_media(
                         instance=instance,

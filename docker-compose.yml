@@ -19,7 +19,8 @@ services:
       - db
         # condition: service_healthy
     volumes:
-      - ./app:/code                 # <-- tu proyecto local en ./app queda en /code
+      - ./app:/code
+      - ./.env.local:/code/.env.local
     env_file:
     - .env.local
     ports:
