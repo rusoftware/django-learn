@@ -354,7 +354,7 @@ def send_messages_view(request):
                     media_url = campaign.media_url
 
                     if settings.CLOUDFLARE_WORKER_FOR_MEDIA:
-                        media_url = campaign.media_file.url.replace(
+                        media_url = media_url.replace(
                             settings.DOMAIN,
                             settings.CLOUDFLARE_WORKER_FOR_MEDIA
                         )
